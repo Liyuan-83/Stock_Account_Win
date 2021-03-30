@@ -1,0 +1,99 @@
+﻿<Window x:Class="Stock_Accounting.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Stock_Accounting"
+        xmlns:style="clr-namespace:ListViewStyle"
+        xmlns:model="clr-namespace:MySQLiteDB.Model"
+        mc:Ignorable="d"
+        Title="記帳" Height="625.985" Width="1062.892" MinWidth="800" MinHeight="600">
+    <Grid Background="#444444">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="10"/>
+            <ColumnDefinition Width="10*" MinWidth="240"/>
+            <ColumnDefinition Width="3*" MinWidth="30"/>
+            <ColumnDefinition Width="*" MinWidth="10"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" MinHeight="10"/>
+            <RowDefinition Height="10*" MinHeight="200"/>
+            <RowDefinition Height="5*" MinHeight="50"/>
+            <RowDefinition Height="*" MinHeight="10"/>
+        </Grid.RowDefinitions>
+        <Border BorderBrush="White" BorderThickness="1" Grid.Column="1" Grid.Row="1" CornerRadius="20" >
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="20"/>
+                </Grid.RowDefinitions>
+                <Label Content="總資產：" Grid.Column="1" Grid.Row="1" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" FontSize="20" Foreground="AntiqueWhite"/>
+                <Label Name="Total_Assets" Content="1000" Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="4" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" FontSize="20" Foreground="AntiqueWhite"/>
+                <StackPanel Grid.Column="2" Grid.Row="2" Orientation="Horizontal">
+                    <Label Content="現金：" VerticalContentAlignment="Center" FontSize="20" Foreground="AntiqueWhite"/>
+                    <Label Name="Total_Cash" Content="1000" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" FontSize="20" Foreground="AntiqueWhite"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Grid.Row="3" Orientation="Horizontal">
+                    <Label Content="股票市值：" VerticalContentAlignment="Center" FontSize="20" Foreground="AntiqueWhite"/>
+                    <Label Name="Total_Value" Content="1000" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" FontSize="20" Foreground="AntiqueWhite"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Grid.Row="4" Orientation="Horizontal">
+                    <Label Content="已實現損益：" VerticalContentAlignment="Center" FontSize="20" Foreground="AntiqueWhite"/>
+                    <Label Name="Total_Profit_And_Loss" Content="1000" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" FontSize="20" Foreground="AntiqueWhite"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border BorderBrush="White" BorderThickness="1" Grid.Column="2" Grid.Row="1" CornerRadius="20">
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Button Content="新增" Margin="10" FontSize="25" Click="Added_Button_Click"/>
+            </Grid>
+        </Border>
+
+        <Border BorderBrush="White" BorderThickness="1" Grid.Column="1" Grid.Row="2" CornerRadius="20">
+            <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0" x:Name="column1"/>
+                <Grid Grid.Column="1" x:Name="column2"/>
+                <ListView Name="Account_List" Background="#00000000" SelectionChanged="ListView_SelectionChanged" Foreground="White" FontSize="20"  ItemContainerStyleSelector="{DynamicResource mystyle}" Grid.ColumnSpan="2">
+                    <ListView.Resources>
+                        <style:ListViewStyleSelector x:Key="mystyle"/>
+                        <Style TargetType="{x:Type GridViewColumnHeader}">
+                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                        </Style>
+                    </ListView.Resources>
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="帳戶" Width="{Binding ElementName=column1,Path=ActualWidth}" DisplayMemberBinding="{Binding Name}"/>
+                            <GridViewColumn Header="資產" Width="{Binding ElementName=column2,Path=ActualWidth}" DisplayMemberBinding="{Binding Assets}"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </Grid>
+        </Border>
+        <Border BorderBrush="White" BorderThickness="1" Grid.Column="2" Grid.Row="2" CornerRadius="20" />
+
+
+    </Grid>
+</Window>
