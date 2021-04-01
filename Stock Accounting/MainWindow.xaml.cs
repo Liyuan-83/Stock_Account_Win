@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using System.Diagnostics;
 using MySQLiteDB;
 using MySQLiteDB.Model;
+using Stock_Accounting.Pages.Alert;
 
 namespace Stock_Accounting
 {
@@ -30,8 +31,21 @@ namespace Stock_Accounting
         {
             set
             {
-                _accountItems = value;
-                Account_List.ItemsSource = _accountItems;
+                _accountItems = value ?? new List<Account>();
+                Account_List.Items.Clear();
+                int totalAssets = 0;
+                int totalStock = 0;
+                int totalCash = 0;
+                foreach (Account item in _accountItems)
+                {
+                    totalAssets += item.Assets;
+                    totalStock += item.StockValue;
+                    totalCash += item.Cash;
+                    Account_List.Items.Add(item);
+                }
+                Total_Assets.Content = totalAssets;
+                Total_Cash.Content = totalCash;
+                Total_Value.Content = totalStock;
             }
             get
             {
@@ -47,21 +61,37 @@ namespace Stock_Accounting
 
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
+            Rm_Btn.IsEnabled = Account_List.SelectedCells.Count > 0;
         }
 
         private void Added_Button_Click(object sender, RoutedEventArgs e)
         {
-            //var temp = new Account() { Name = "test" + count };
-            //_db.Acounts.Add(temp);
-            //_db.SaveChanges();
-            //count++;
-            Account account = new Account();
-            account.Name = "test";
-            account.Assets = 10000;
-            db.NewData(account);
+
+            var alert = new NewAccountAlert();
+            switch (alert.ShowDialog())
+            {
+                case true:
+                    db.NewData(alert.account);
+                    AccountItems = db.GetData(Account.TABLE_NAME, typeof(Account)) as List<Account>;
+                    break;
+                default:
+
+                    break;
+            }
+        }
+
+        private void DataGridCell_MouceDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            int index = Account_List.SelectedIndex;
+            Console.WriteLine(AccountItems[index].Name);
+        }
+
+        private void Remove_Button_Click(object sender, RoutedEventArgs e)
+        {
+            Account selectedItem = Account_List.SelectedItem as Account;
+            db.RemoveData(selectedItem);
             AccountItems = db.GetData(Account.TABLE_NAME, typeof(Account)) as List<Account>;
-            
+            Rm_Btn.IsEnabled = false;
         }
     }
 }

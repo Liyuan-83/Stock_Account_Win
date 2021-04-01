@@ -17,11 +17,11 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" MinHeight="10"/>
-            <RowDefinition Height="10*" MinHeight="200"/>
+            <RowDefinition Height="8*" MinHeight="200"/>
             <RowDefinition Height="5*" MinHeight="50"/>
             <RowDefinition Height="*" MinHeight="10"/>
         </Grid.RowDefinitions>
-        <Border BorderBrush="White" BorderThickness="1" Grid.Column="1" Grid.Row="1" CornerRadius="20" >
+        <Border BorderBrush="White" BorderThickness="1" Grid.Column="1" Grid.Row="1" CornerRadius="20" Margin="5">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="20"/>
@@ -54,21 +54,21 @@
             </Grid>
         </Border>
 
-        <Border BorderBrush="White" BorderThickness="1" Grid.Column="2" Grid.Row="1" CornerRadius="20">
+        <Border BorderBrush="White" BorderThickness="1" Grid.Column="2" Grid.Row="1" CornerRadius="20" Margin="5">
             <Grid Margin="5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Button Content="新增" Margin="10" FontSize="25" Click="Added_Button_Click"/>
+                <Button Name="Add_Btn" Content="新增帳戶" Grid.Row="0" Margin="10" FontSize="25" Click="Added_Button_Click"/>
+                <Button Name="Rm_Btn" Content="刪除帳戶" Grid.Row="1" Margin="10" FontSize="25" Click="Remove_Button_Click" IsEnabled="False"/>
             </Grid>
         </Border>
 
-        <Border BorderBrush="White" BorderThickness="1" Grid.Column="1" Grid.Row="2" CornerRadius="20">
+        <Border BorderBrush="White" BorderThickness="1" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" CornerRadius="20" Margin="5">
             <Grid Margin="5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -76,24 +76,27 @@
                 </Grid.ColumnDefinitions>
                 <Grid Grid.Column="0" x:Name="column1"/>
                 <Grid Grid.Column="1" x:Name="column2"/>
-                <ListView Name="Account_List" Background="#00000000" SelectionChanged="ListView_SelectionChanged" Foreground="White" FontSize="20"  ItemContainerStyleSelector="{DynamicResource mystyle}" Grid.ColumnSpan="2">
-                    <ListView.Resources>
-                        <style:ListViewStyleSelector x:Key="mystyle"/>
-                        <Style TargetType="{x:Type GridViewColumnHeader}">
-                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+
+                <DataGrid Name="Account_List" Grid.ColumnSpan="2" Background="#000000"  Style="{DynamicResource Style}" IsReadOnly="True" CanUserReorderColumns="True" SelectionMode="Single" SelectionChanged="ListView_SelectionChanged">
+                    <DataGrid.Resources>
+                        <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource Style1}" x:Key="Style">
+                            <Setter Property="ItemContainerStyleSelector">
+                                <Setter.Value>
+                                    <style:ListViewStyleSelector DoubleClickHandler="DataGridCell_MouceDoubleClick"/>
+                                </Setter.Value>
+                            </Setter>
                         </Style>
-                    </ListView.Resources>
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn Header="帳戶" Width="{Binding ElementName=column1,Path=ActualWidth}" DisplayMemberBinding="{Binding Name}"/>
-                            <GridViewColumn Header="資產" Width="{Binding ElementName=column2,Path=ActualWidth}" DisplayMemberBinding="{Binding Assets}"/>
-                        </GridView>
-                    </ListView.View>
-                </ListView>
+                    </DataGrid.Resources>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="帳戶" Width="*" FontSize="20" Binding="{Binding Name}"/>
+                        <DataGridTextColumn Header="資產" Width="3*" FontSize="20" Binding="{Binding Assets}"/>
+                        <DataGridTextColumn Header="現金" Width="3*" FontSize="20" Binding="{Binding Cash}"/>
+                        <DataGridTextColumn Header="股票" Width="3*" FontSize="20" Binding="{Binding StockValue}"/>
+                    </DataGrid.Columns>
+
+                </DataGrid>
             </Grid>
         </Border>
-        <Border BorderBrush="White" BorderThickness="1" Grid.Column="2" Grid.Row="2" CornerRadius="20" />
-
-
     </Grid>
 </Window>

@@ -7,11 +7,13 @@ using System.Data.SQLite;
 
 namespace MySQLiteDB.Model
 {
-    class _DefaultModel
+    public class _DefaultModel
     {
         public static String TABLE_NAME = "default";
 
         public int ID { get; set; }
+
+        public virtual String TableName() => TABLE_NAME;
 
         public virtual String CreateTable()
         {

@@ -17,7 +17,8 @@ namespace MySQLiteDB
         private SQLiteConnection sqlite_connect;
         private SQLiteCommand sqlite_cmd;
 
-        private void ConnectDB() {
+        private void ConnectDB()
+        {
             if (!File.Exists(System.AppDomain.CurrentDomain.BaseDirectory + @"\myData.db"))
             {
                 SQLiteConnection.CreateFile("myData.db");
@@ -47,6 +48,26 @@ namespace MySQLiteDB
             sqlite_connect.Close();
         }
 
+        public void RemoveData(_DefaultModel data)
+        {
+            ConnectDB();
+            try
+            {
+                sqlite_cmd.CommandText = "DELETE FROM " + data.TableName() + " WHERE ID = " + data.ID;
+                sqlite_cmd.ExecuteNonQuery();
+
+                sqlite_cmd.CommandText = "SELECT count(*) FROM " + data.TableName();
+                var count = Int32.Parse(sqlite_cmd.ExecuteScalar().ToString());
+                if (count == 0)
+                {
+                    sqlite_cmd.CommandText = "DROP TABLE " + data.TableName();
+                    sqlite_cmd.ExecuteNonQuery();
+                }
+            }
+            catch { }
+            sqlite_connect.Close();
+        }
+
         public IList GetData(String tableName, Type type)
         {
             ConnectDB();
@@ -68,7 +89,9 @@ namespace MySQLiteDB
 
                 return list;
             }
-            catch {
+            catch
+            {
+                sqlite_connect.Close();
                 return null;
             }
         }

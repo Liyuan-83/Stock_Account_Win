@@ -4,6 +4,12 @@
              xmlns:local="clr-namespace:Stock_Accounting"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/UIExtension/ColorExtension.xaml" />
+                <ResourceDictionary Source="/UIExtension/Style/DataGridStyle.xaml" />
+                <ResourceDictionary Source="/UIExtension/Style/TextBoxStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
