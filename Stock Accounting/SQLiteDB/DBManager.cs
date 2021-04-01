@@ -68,7 +68,17 @@ namespace MySQLiteDB
             sqlite_connect.Close();
         }
 
-        public IList GetData(String tableName, Type type)
+        public void EditData(_DefaultModel data)
+        {
+            ConnectDB();
+            sqlite_cmd.CommandText = data.EditValue();
+
+            sqlite_cmd.ExecuteNonQuery();
+
+            sqlite_connect.Close();
+        }
+
+        public IList GetAllListFromTable(String tableName, Type type)
         {
             ConnectDB();
             try
@@ -82,7 +92,7 @@ namespace MySQLiteDB
                 while (sqlite_datareader.Read())
                 {
                     var temp = Activator.CreateInstance(type) as _DefaultModel;
-                    temp.SetValue(sqlite_datareader);
+                    temp.GetValue(sqlite_datareader);
                     list.Add(temp);
                 }
                 sqlite_connect.Close();

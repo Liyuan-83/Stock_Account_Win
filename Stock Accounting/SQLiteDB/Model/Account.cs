@@ -33,14 +33,19 @@ namespace MySQLiteDB.Model
             return "INSERT INTO " + TABLE_NAME + " VALUES (null, '" + Name + "','" + Assets + "','" + Cash + "','" + Fee + "','" + StockValue + "');";
         }
 
-        public override void SetValue(SQLiteDataReader reader)
+        public override string EditValue()
         {
-            base.SetValue(reader);
-            this.Name = reader["name"].ToString();
-            this.Assets = Int32.Parse(reader["assets"].ToString());
-            this.Cash = Int32.Parse(reader["cash"].ToString());
-            this.Fee = Double.Parse(reader["fee"].ToString());
-            this.StockValue = Int32.Parse(reader["stock_value"].ToString());
+            return "UPDATE " + TABLE_NAME + " SET name = '" + Name + "', assets = " + Assets + ",cash = " + Cash + ",fee = " + Fee + ",stock_value = " + StockValue + " WHERE id = " + ID;
+        }
+
+        public override void GetValue(SQLiteDataReader reader)
+        {
+            ID = Int32.Parse(reader["id"].ToString());
+            Name = reader["name"].ToString();
+            Assets = Int32.Parse(reader["assets"].ToString());
+            Cash = Int32.Parse(reader["cash"].ToString());
+            Fee = Double.Parse(reader["fee"].ToString());
+            StockValue = Int32.Parse(reader["stock_value"].ToString());
         }
     }
 }

@@ -7,27 +7,20 @@ using System.Data.SQLite;
 
 namespace MySQLiteDB.Model
 {
-    public class _DefaultModel
+    public abstract class _DefaultModel
     {
         public static String TABLE_NAME = "default";
 
         public int ID { get; set; }
 
-        public virtual String TableName() => TABLE_NAME;
+        public abstract String TableName();
 
-        public virtual String CreateTable()
-        {
-            return @"CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (id INTEGER PRIMARY KEY AUTOINCREMENT)";
-        }
+        public abstract String CreateTable();
 
-        public virtual String InsertValue()
-        {
-            return "INSERT INTO " + TABLE_NAME + " VALUES (null);";
-        }
+        public abstract String InsertValue();
 
-        public virtual void SetValue(SQLiteDataReader reader)
-        {
-            this.ID = Int32.Parse(reader["id"].ToString());
-        }
+        public abstract String EditValue();
+
+        public abstract void GetValue(SQLiteDataReader reader);
     }
 }

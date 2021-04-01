@@ -53,6 +53,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="HtmlAgilityPack, Version=1.11.32.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.11.32\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
@@ -79,11 +82,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Manager\InternetManager.cs" />
     <Compile Include="Pages\Alert\NewAccountAlert.xaml.cs">
       <DependentUpon>NewAccountAlert.xaml</DependentUpon>
     </Compile>
     <Compile Include="SQLiteDB\DBManager.cs" />
     <Compile Include="SQLiteDB\Model\Account.cs" />
+    <Compile Include="SQLiteDB\Model\Order.cs" />
     <Compile Include="SQLiteDB\Model\_DefaultModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

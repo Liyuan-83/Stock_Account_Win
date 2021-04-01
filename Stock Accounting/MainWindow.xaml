@@ -64,7 +64,8 @@
                 </Grid.RowDefinitions>
 
                 <Button Name="Add_Btn" Content="新增帳戶" Grid.Row="0" Margin="10" FontSize="25" Click="Added_Button_Click"/>
-                <Button Name="Rm_Btn" Content="刪除帳戶" Grid.Row="1" Margin="10" FontSize="25" Click="Remove_Button_Click" IsEnabled="False"/>
+                <Button Name="Edit_Btn" Content="編輯帳戶" Grid.Row="1" Margin="10" FontSize="25" Click="Edit_Button_Click" IsEnabled="False"/>
+                <Button Name="Rm_Btn" Content="刪除帳戶" Grid.Row="2" Margin="10" FontSize="25" Click="Remove_Button_Click" IsEnabled="False"/>
             </Grid>
         </Border>
 

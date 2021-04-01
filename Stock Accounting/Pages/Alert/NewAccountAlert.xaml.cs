@@ -20,11 +20,20 @@ namespace Stock_Accounting.Pages.Alert
     /// </summary>
     public partial class NewAccountAlert : Window
     {
-        public Account account { get; } = new Account();
+        public Account account { get; set; } = new Account();
 
         public NewAccountAlert()
         {
             InitializeComponent();
+        }
+
+        public NewAccountAlert(Account _account)
+        {
+            InitializeComponent();
+            account = _account;
+            Account.Text = _account.Name;
+            Cash.Text = _account.Cash.ToString();
+            Fee.Text = (_account.Fee * 100).ToString();
         }
 
         private void OK_Btn_Click(object sender, RoutedEventArgs e)
