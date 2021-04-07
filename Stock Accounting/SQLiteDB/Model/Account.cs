@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data.SQLite;
 using System.ComponentModel;
+using System.Collections;
 
 namespace MySQLiteDB.Model
 {

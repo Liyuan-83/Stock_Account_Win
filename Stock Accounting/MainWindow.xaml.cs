@@ -130,7 +130,8 @@ namespace Stock_Accounting
 
         private void Order_Button_Click(object sender, RoutedEventArgs e)
         {
-
+            var alert = new NewOrderAlert(Account_List.SelectedIndex);
+            alert.ShowDialog();
         }
 
         private void MediaElement_MediaEnded(object sender, RoutedEventArgs e)
