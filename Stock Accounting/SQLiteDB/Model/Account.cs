@@ -28,14 +28,11 @@ namespace MySQLiteDB.Model
             return @"CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, assets INTEGER, cash INTEGER, fee REAL, stock_value INTEGER)";
         }
 
-        public override string InsertValue()
+        public override string InsertOrUpdateValue()
         {
-            return "INSERT INTO " + TABLE_NAME + " VALUES (null, '" + Name + "','" + Assets + "','" + Cash + "','" + Fee + "','" + StockValue + "');";
-        }
-
-        public override string EditValue()
-        {
-            return "UPDATE " + TABLE_NAME + " SET name = '" + Name + "', assets = " + Assets + ",cash = " + Cash + ",fee = " + Fee + ",stock_value = " + StockValue + " WHERE id = " + ID;
+            string _ID = (ID >= 0) ? ID.ToString() : "NULL";
+            return "INSERT OR IGNORE INTO " + TABLE_NAME + " VALUES (" + _ID + ", '" + Name + "','" + Assets + "','" + Cash + "','" + Fee + "','" + StockValue + "');" +
+                "UPDATE " + TABLE_NAME + " SET name = '" + Name + "', assets = " + Assets + ",cash = " + Cash + ",fee = " + Fee + ",stock_value = " + StockValue + " WHERE id = " + _ID;
         }
 
         public override void GetValue(SQLiteDataReader reader)

@@ -25,6 +25,7 @@ namespace Stock_Accounting.Pages.Alert
         public NewAccountAlert()
         {
             InitializeComponent();
+            account.ID = -1;
         }
 
         public NewAccountAlert(Account _account)

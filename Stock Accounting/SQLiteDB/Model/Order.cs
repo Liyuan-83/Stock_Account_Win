@@ -34,14 +34,9 @@ namespace MySQLiteDB.Model
             return @"CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (id INTEGER PRIMARY KEY AUTOINCREMENT, account_name TEXT, stock_id TEXT, stock_name TEXT, is_buy INTERGER, price INTERGER, count INTEGER, fee INTEGER, tax INTEGER)";
         }
 
-        public override string InsertValue()
+        public override string InsertOrUpdateValue()
         {
             return "INSERT INTO " + TABLE_NAME + " VALUES (null, '" + AccountName + "','" + StockID + "','" + StockName + "','" + IsBuy + "','" + Price + "','" + Count + "','" + Fee + "','" + Tax + "');";
-        }
-
-        public override string EditValue()
-        {
-            return "UPDATE " + TABLE_NAME + " SET account_name = '" + AccountName + "', stock_id = " + StockID + ",stock_name = " + StockName + ",is_buy = " + IsBuy + ",price = " + Price + ",count = " + Count + ",fee = " + Fee + ",tax = " + Tax + " WHERE id = " + ID;
         }
 
         public override void GetValue(SQLiteDataReader reader)

@@ -17,9 +17,7 @@ namespace MySQLiteDB.Model
 
         public abstract String CreateTable();
 
-        public abstract String InsertValue();
-
-        public abstract String EditValue();
+        public abstract String InsertOrUpdateValue();
 
         public abstract void GetValue(SQLiteDataReader reader);
     }

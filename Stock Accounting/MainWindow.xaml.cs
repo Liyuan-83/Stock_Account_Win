@@ -19,6 +19,7 @@ using MySQLiteDB.Model;
 using Stock_Accounting.Pages.Alert;
 using Stock_Accounting.Manager;
 using System.Net;
+using System.Threading;
 
 namespace Stock_Accounting
 {
@@ -27,7 +28,6 @@ namespace Stock_Accounting
     /// </summary>
     public partial class MainWindow : Window
     {
-        private DBManager db = new DBManager();
         private List<Account> _accountItems = new List<Account>();
         private List<Account> AccountItems
         {
@@ -58,11 +58,29 @@ namespace Stock_Accounting
         public MainWindow()
         {
             InitializeComponent();
-            AccountItems = db.GetAllListFromTable(Account.TABLE_NAME, typeof(Account)) as List<Account>;
-            if (InternetManager.share.CheckConnection())
+            AccountItems = DBManager.share.GetAllListFromTable(Account.TABLE_NAME, typeof(Account)) as List<Account>;
+            Order_Btn.IsEnabled = AccountItems.Count > 0;
+            if (InternetManager.share.CheckConnection() && DBManager.share.ShouldUpdateCompanyData())
             {
-                InternetManager.share.UpdateCompanyData();
+                InternetManager.share.UpdateMsgFunc = new Action<string>(updateLabel);
+                InternetManager.share.ShowLoading = new Action<bool>(showLoading);
+                Thread main = Thread.CurrentThread;
+                ThreadPool.QueueUserWorkItem(o =>
+                {
+                    InternetManager.share.UpdateCompanyData(main);
+                });
             }
+        }
+
+        void updateLabel(string msg)
+        {
+            Console.WriteLine(msg);
+        }
+
+        void showLoading(bool isFinish)
+        {
+            media.Visibility = isFinish ? Visibility.Hidden : Visibility.Visible;
+            Loading_Label.Visibility = isFinish ? Visibility.Hidden : Visibility.Visible;
         }
 
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -77,8 +95,8 @@ namespace Stock_Accounting
             var alert = new NewAccountAlert();
             if (alert.ShowDialog() == true)
             {
-                db.NewData(alert.account);
-                AccountItems = db.GetAllListFromTable(Account.TABLE_NAME, typeof(Account)) as List<Account>;
+                DBManager.share.InsertOrUpdateData(alert.account);
+                AccountItems = DBManager.share.GetAllListFromTable(Account.TABLE_NAME, typeof(Account)) as List<Account>;
             }
         }
 
@@ -91,8 +109,8 @@ namespace Stock_Accounting
         private void Remove_Button_Click(object sender, RoutedEventArgs e)
         {
             Account selectedItem = Account_List.SelectedItem as Account;
-            db.RemoveData(selectedItem);
-            AccountItems = db.GetAllListFromTable(Account.TABLE_NAME, typeof(Account)) as List<Account>;
+            DBManager.share.RemoveData(selectedItem);
+            AccountItems = DBManager.share.GetAllListFromTable(Account.TABLE_NAME, typeof(Account)) as List<Account>;
             Edit_Btn.IsEnabled = false;
             Rm_Btn.IsEnabled = false;
         }
@@ -103,11 +121,22 @@ namespace Stock_Accounting
             var alert = new NewAccountAlert(selectedItem);
             if (alert.ShowDialog() == true)
             {
-                db.EditData(alert.account);
-                AccountItems = db.GetAllListFromTable(Account.TABLE_NAME, typeof(Account)) as List<Account>;
+                DBManager.share.InsertOrUpdateData(alert.account);
+                AccountItems = DBManager.share.GetAllListFromTable(Account.TABLE_NAME, typeof(Account)) as List<Account>;
                 Edit_Btn.IsEnabled = false;
                 Rm_Btn.IsEnabled = false;
             }
+        }
+
+        private void Order_Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void MediaElement_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            media.Position = new TimeSpan(0, 0, 1);
+            media.Play();
         }
     }
 }

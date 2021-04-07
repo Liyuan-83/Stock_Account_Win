@@ -9,11 +9,13 @@ using System.Windows;
 using System.Diagnostics;
 using MySQLiteDB.Model;
 using System.Collections;
+using System.Globalization;
 
 namespace MySQLiteDB
 {
     class DBManager
     {
+        public static DBManager share = new DBManager();
         private SQLiteConnection sqlite_connect;
         private SQLiteCommand sqlite_cmd;
 
@@ -35,14 +37,15 @@ namespace MySQLiteDB
             sqlite_cmd = sqlite_connect.CreateCommand();
         }
 
-        public void NewData(_DefaultModel data)
+        public void InsertOrUpdateData(_DefaultModel data)
         {
             ConnectDB();
             sqlite_cmd.CommandText = data.CreateTable();
 
             sqlite_cmd.ExecuteNonQuery();
 
-            sqlite_cmd.CommandText = data.InsertValue();
+            sqlite_cmd.CommandText = data.InsertOrUpdateValue();
+            
             sqlite_cmd.ExecuteNonQuery();
 
             sqlite_connect.Close();
@@ -65,16 +68,6 @@ namespace MySQLiteDB
                 }
             }
             catch { }
-            sqlite_connect.Close();
-        }
-
-        public void EditData(_DefaultModel data)
-        {
-            ConnectDB();
-            sqlite_cmd.CommandText = data.EditValue();
-
-            sqlite_cmd.ExecuteNonQuery();
-
             sqlite_connect.Close();
         }
 
@@ -104,6 +97,27 @@ namespace MySQLiteDB
                 sqlite_connect.Close();
                 return null;
             }
+        }
+
+        public bool ShouldUpdateCompanyData()
+        {
+            ConnectDB();
+            sqlite_cmd.CommandText = "SELECT * FROM " + CompanyInfo.TABLE_NAME + " LIMIT 1";
+            SQLiteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+            var temp = Activator.CreateInstance(typeof(CompanyInfo)) as CompanyInfo;
+            while (sqlite_datareader.Read())
+            {
+                temp.GetValue(sqlite_datareader);
+            }
+            sqlite_connect.Close();
+            var twCulture = new CultureInfo("zh-TW", true);
+            twCulture.DateTimeFormat.Calendar = new TaiwanCalendar();
+            string str = temp.UpdateDate;
+            str = str.PadLeft(8, '0');
+            DateTime today = DateTime.Now;
+            DateTime updateTime = DateTime.ParseExact(str, "yMMdd", twCulture);
+            TimeSpan sp = today.Subtract(updateTime);
+            return sp.TotalDays > 10;
         }
     }
 }
