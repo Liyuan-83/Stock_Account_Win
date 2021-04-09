@@ -7,6 +7,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/UIExtension/ColorExtension.xaml" />
+                <ResourceDictionary Source="/UIExtension/Style/ButtonStyle.xaml" />
                 <ResourceDictionary Source="/UIExtension/Style/DataGridStyle.xaml" />
                 <ResourceDictionary Source="/UIExtension/Style/TextBoxStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>

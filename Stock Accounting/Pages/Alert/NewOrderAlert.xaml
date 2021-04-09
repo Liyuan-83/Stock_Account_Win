@@ -3,9 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:Stock_Accounting.Pages.Alert"
         mc:Ignorable="d"
-        Title="NewOrderAlert" Height="500" Width="800" MinHeight="500" MinWidth="700" Background="#333333">
+        Title="NewOrderAlert" MinHeight="550" MinWidth="800" MaxHeight="550" MaxWidth="800" Background="#333333">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
@@ -35,22 +36,95 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="帳戶" Grid.Row="0" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
-            <TextBlock Text="股票代號/名稱" Grid.Row="1" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
-            <TextBlock Text="交易類型" Grid.Row="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
-            <TextBlock Text="買賣進出" Grid.Row="3" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
-            <TextBlock Text="成交日期" Grid.Row="4" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
+            <TextBlock Text="成交日期" Grid.Row="0" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
+            <TextBlock Text="帳戶" Grid.Row="1" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
+            <TextBlock Text="買賣進出" Grid.Row="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
+            <TextBlock Text="股票代號/名稱" Grid.Row="3" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
+            <TextBlock Text="交易類型" Grid.Row="4" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
+            
             <TextBlock Text="成交數量" Grid.Row="5" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
             <TextBlock Text="成交價格" Grid.Row="6" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
             <TextBlock Text="備註" Grid.Row="7" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
 
-            <ComboBox x:Name="Account_Selection" Grid.Row="0" Grid.Column="1" SelectionChanged="Account_SelectionChanged" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" Margin="3"/>
+            <DatePicker Grid.Row="0" Grid.Column="1"  FontSize="20" VerticalContentAlignment="Center" SelectedDate="{x:Static sys:DateTime.Now}" SelectedDateChanged="DatePicker_SelectedDateChanged" />
 
-            <TextBox Name="Stock_Info" Style="{StaticResource placeHolder}" Tag="EX.2010"  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" FontSize="20" Margin="10" TextAlignment="Center" TextChanged="Stock_Info_TextChangedChanged" />
+            <ComboBox x:Name="Account_Selection" Grid.Row="1" Grid.Column="1" SelectionChanged="Account_SelectionChanged" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" Margin="5"/>
+
+            <Button x:Name="IsBuy_Button" Grid.Row="2" Grid.Column="1" Content="買進" FontSize="20" Margin="5" Background="DarkRed"  Foreground="White" BorderBrush="White" Click="IsBuy_Button_Click" Style="{StaticResource BorderHightStyle}"/>
+
+            <ComboBox Name="Stock_Info" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" FontSize="20" Margin="5" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsEditable="True" IsTextSearchEnabled="False" StaysOpenOnEdit="True" KeyUp="Stock_Info_KeyUp" SelectionChanged="Stock_Info_SelectionChanged">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+            </ComboBox>
+
+            <ComboBox x:Name="Type_Selection" Grid.Row="4" Grid.Column="1" SelectionChanged="Type_SelectionChanged" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" Margin="5" SelectedIndex="0"/>
+
+            <TextBox Name="Count_TextBox" Style="{StaticResource placeHolder}" Tag="請輸入數量"  Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="2" FontSize="20" Margin="5" TextAlignment="Center" TextChanged="Count_TextBox_TextChangedChanged"/>
+
+            <TextBox Name="Price_TextBox" Style="{StaticResource placeHolder}" Tag="請輸入金額"  Grid.Column="1" Grid.Row="6" Grid.ColumnSpan="2" FontSize="20" Margin="5" TextAlignment="Center" TextChanged="Price_TextBox_TextChangedChanged"/>
+
+            <TextBox Name="Mark_TextBox" Style="{StaticResource placeHolder}" Tag="請輸入備註"  Grid.Column="1" Grid.Row="7" Grid.ColumnSpan="2" FontSize="20" Margin="5" TextAlignment="Center" TextChanged="Mark_TextBox_TextChangedChanged"/>
         </Grid>
 
         <Grid Grid.Row="1" Grid.Column="2">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="8*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border Margin="5" BorderBrush="White" BorderThickness="1" CornerRadius="20" Grid.ColumnSpan="5">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="訂單資訊" Grid.Column="1" Grid.ColumnSpan="2" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        <Label Content="交易日期:" Grid.Row="1" Grid.Column="1" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <Label x:Name="Order_Account_Label" Grid.Row="1" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        <Label x:Name="Order_Date_Label" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        
+                        <Label x:Name="Order_IsBuy_Label" Grid.Row="2" Grid.Column="0" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        <Label x:Name="Order_Type_Label" Grid.Row="2" Grid.Column="1" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        <Label x:Name="Order_StockID_Label" Grid.Row="2" Grid.Column="2" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        <Label x:Name="Order_StockName_Label" Grid.Row="2" Grid.Column="3" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
 
+
+                        <Label Content="成交數量:" Grid.Row="3" Grid.Column="0" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <Label x:Name="Order_Count_Label" Grid.Row="3" Grid.Column="1" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+
+                        <Label Content="成交價格:" Grid.Row="3" Grid.Column="2" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <Label x:Name="Order_Price_Label" Grid.Row="3" Grid.Column="3" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+
+                        <Label Content="手續費:" Grid.Row="4" Grid.Column="0" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <Label x:Name="Order_Fee_Label" Grid.Row="4" Grid.Column="1" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+
+                        <Label Content="交易稅:" Grid.Row="4" Grid.Column="2" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <Label x:Name="Order_Tax_Label" Grid.Row="4" Grid.Column="3" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+
+                    </Grid>
+                </Border>
+                <Button Grid.Row="1" Grid.Column="0" Content="清空" FontSize="20"/>
+                <Button x:Name="OK_Btn" Grid.Row="1" Grid.Column="2" Content="確定" FontSize="20"/>
+            </Grid>
         </Grid>
 
     </Grid>

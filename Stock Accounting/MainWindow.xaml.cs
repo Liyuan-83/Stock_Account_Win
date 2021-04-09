@@ -130,7 +130,8 @@ namespace Stock_Accounting
 
         private void Order_Button_Click(object sender, RoutedEventArgs e)
         {
-            var alert = new NewOrderAlert(Account_List.SelectedIndex);
+            int selected = Account_List.SelectedIndex >= 0 ? Account_List.SelectedIndex : 0;
+            var alert = new NewOrderAlert(selected);
             alert.ShowDialog();
         }
 

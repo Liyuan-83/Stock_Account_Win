@@ -83,6 +83,43 @@ namespace MySQLiteDB.Model
 
         public CompanyInfo() { }
 
+        public CompanyInfo(SQLiteDataReader reader)
+        {
+            UpdateDate = reader["出表日期"].ToString();
+            ID = reader["公司代號"].ToString();
+            Name = reader["公司名稱"].ToString();
+            Nickname = reader["公司簡稱"].ToString();
+            Registration = reader["外國企業註冊地國"].ToString();
+            Industry = Int32.Parse(reader["產業別"].ToString());
+            Address = reader["住址"].ToString();
+            BusinessNumber = reader["營利事業統一編號"].ToString();
+            Chairman = reader["董事長"].ToString();
+            GM = reader["總經理"].ToString();
+            Speaker = reader["發言人"].ToString();
+            SpeakerTitle = reader["發言人職稱"].ToString();
+            ActingSpeaker = reader["代理發言人"].ToString();
+            Phone = reader["總機電話"].ToString();
+            StartDate = reader["成立日期"].ToString();
+            ListingDate = reader["上市日期"].ToString();
+            DenominationPerShareOfCommonStock = reader["普通股每股面額"].ToString();
+            PaidinCapital = Int64.Parse(reader["實收資本額"].ToString());
+            NumberOfPrivateEquity = Int64.Parse(reader["私募股數"].ToString());
+            SpecialShares = Int64.Parse(reader["特別股"].ToString());
+            TypesOfPreparationOfFinancialStatements = Int32.Parse(reader["編制財務報表類型"].ToString());
+            TransferAgency = reader["股票過戶機構"].ToString();
+            TransferPhone = reader["過戶電話"].ToString();
+            TransferAddress = reader["過戶地址"].ToString();
+            VisaAccountingFirm = reader["簽證會計師事務所"].ToString();
+            VisaAccountant1 = reader["簽證會計師1"].ToString();
+            VisaAccountant2 = reader["簽證會計師2"].ToString();
+            EnglishAbbreviation = reader["英文簡稱"].ToString();
+            EnglishCorrespondenceAddress = reader["英文通訊地址"].ToString();
+            FaxMachineNumber = reader["傳真機號碼"].ToString();
+            Email = reader["電子郵件信箱"].ToString();
+            URL = reader["網址"].ToString();
+            Level = Int32.Parse(reader["上市上櫃"].ToString());
+        }
+
         public CompanyInfo(string[] strArr, Company_level level)
         {
             UpdateDate = strArr[0];
@@ -196,43 +233,6 @@ namespace MySQLiteDB.Model
                 "電子郵件信箱 = '" + Email + "'," +
                 "網址 = '" + URL + "'," +
                 "上市上櫃 = " + Level + " WHERE 公司代號 = '" + ID + "';";
-        }
-
-        public override void GetValue(SQLiteDataReader reader)
-        {
-            UpdateDate = reader["出表日期"].ToString();
-            ID = reader["公司代號"].ToString();
-            Name = reader["公司名稱"].ToString();
-            Nickname = reader["公司簡稱"].ToString();
-            Registration = reader["外國企業註冊地國"].ToString();
-            Industry = Int32.Parse(reader["產業別"].ToString());
-            Address = reader["住址"].ToString();
-            BusinessNumber = reader["營利事業統一編號"].ToString();
-            Chairman = reader["董事長"].ToString();
-            GM = reader["總經理"].ToString();
-            Speaker = reader["發言人"].ToString();
-            SpeakerTitle = reader["發言人職稱"].ToString();
-            ActingSpeaker = reader["代理發言人"].ToString();
-            Phone = reader["總機電話"].ToString();
-            StartDate = reader["成立日期"].ToString();
-            ListingDate = reader["上市日期"].ToString();
-            DenominationPerShareOfCommonStock = reader["普通股每股面額"].ToString();
-            PaidinCapital = Int64.Parse(reader["實收資本額"].ToString());
-            NumberOfPrivateEquity = Int64.Parse(reader["私募股數"].ToString());
-            SpecialShares = Int64.Parse(reader["特別股"].ToString());
-            TypesOfPreparationOfFinancialStatements = Int32.Parse(reader["編制財務報表類型"].ToString());
-            TransferAgency = reader["股票過戶機構"].ToString();
-            TransferPhone = reader["過戶電話"].ToString();
-            TransferAddress = reader["過戶地址"].ToString();
-            VisaAccountingFirm = reader["簽證會計師事務所"].ToString();
-            VisaAccountant1 = reader["簽證會計師1"].ToString();
-            VisaAccountant2 = reader["簽證會計師2"].ToString();
-            EnglishAbbreviation = reader["英文簡稱"].ToString();
-            EnglishCorrespondenceAddress = reader["英文通訊地址"].ToString();
-            FaxMachineNumber = reader["傳真機號碼"].ToString();
-            Email = reader["電子郵件信箱"].ToString();
-            URL = reader["網址"].ToString();
-            Level = Int32.Parse(reader["上市上櫃"].ToString());
         }
     }
 }

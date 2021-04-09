@@ -84,8 +84,7 @@ namespace MySQLiteDB
                 IList list = Activator.CreateInstance(listType) as IList;
                 while (sqlite_datareader.Read())
                 {
-                    var temp = Activator.CreateInstance(type) as _DefaultModel;
-                    temp.GetValue(sqlite_datareader);
+                    var temp = Activator.CreateInstance(type, sqlite_datareader);
                     list.Add(temp);
                 }
                 sqlite_connect.Close();
@@ -104,10 +103,10 @@ namespace MySQLiteDB
             ConnectDB();
             sqlite_cmd.CommandText = "SELECT * FROM " + CompanyInfo.TABLE_NAME + " LIMIT 1";
             SQLiteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
-            var temp = Activator.CreateInstance(typeof(CompanyInfo)) as CompanyInfo;
+            CompanyInfo temp = new CompanyInfo();
             while (sqlite_datareader.Read())
             {
-                temp.GetValue(sqlite_datareader);
+                temp = (CompanyInfo)Activator.CreateInstance(typeof(CompanyInfo), sqlite_datareader);
             }
             sqlite_connect.Close();
             var twCulture = new CultureInfo("zh-TW", true);
