@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using MySQLiteDB.Model;
 using MySQLiteDB;
+using Stock_Accounting.Manager;
 
 namespace Stock_Accounting.Pages.Alert
 {
@@ -24,6 +25,7 @@ namespace Stock_Accounting.Pages.Alert
         private List<Account> Accounts = (List<Account>)DBManager.share.GetAllListFromTable(Account.TABLE_NAME, typeof(Account));
         private List<CompanyInfo> CompanyInfos = (List<CompanyInfo>)DBManager.share.GetAllListFromTable(CompanyInfo.TABLE_NAME, typeof(CompanyInfo));
         private Order Order = new Order();
+        private double StockClosingPrice = 0;
 
         public NewOrderAlert(int selectIndex = 0)
         {
@@ -118,15 +120,27 @@ namespace Stock_Accounting.Pages.Alert
 
         private void Calculation()
         {
-            if (Account_Selection.SelectedIndex < 0) return;
+            OK_Btn.IsEnabled = false;
+            if (Account_Selection.SelectedIndex < 0 || Stock_Info.SelectedIndex < 0 || Order.Count <= 0 || Order.Price <= 0)
+            {
+                Order.Fee = 0;
+                Order.Tax = 0;
+                return;
+            }
 
-            int fee = (int)(Order.Count * Order.Price * 0.001425 * Accounts[Account_Selection.SelectedIndex].Fee);
+            int fee = (int)Math.Ceiling(Order.Count * Order.Price * 0.001425 * Accounts[Account_Selection.SelectedIndex].Fee);
             fee = (Order.Type == 3 || fee >= 20) ? fee : 20;
             Order.Fee = fee;
 
-            int tax = (int)(Order.Count * Order.Price * 0.003);
+            int tax = (int)Math.Ceiling(Order.Count * Order.Price * 0.003);
             tax = (Order.IsBuy) ? 0 : tax;
             Order.Tax = tax;
+            int cost = (int)(Order.Price * Order.Count) * (Order.IsBuy ? -1 : 1) - Order.Fee - Order.Tax;
+            Total_Cost_Label.Content = cost;
+            Total_Cost_Label.Foreground = (cost >= 0) ? Brushes.DarkRed : Brushes.DarkGreen;
+            Total_Cost_Label.Background = (cost >= 0) ? Brushes.LightPink : Brushes.LightGreen;
+            Total_Value_Label.Content = (int)(StockClosingPrice * Order.Count);
+            OK_Btn.IsEnabled = true;
         }
 
         private void Account_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -161,6 +175,9 @@ namespace Stock_Accounting.Pages.Alert
             Button btn = (Button)sender;
             btn.Content = Order.IsBuy ? "買進" : "賣出";
             btn.Background = Order.IsBuy ? Brushes.DarkRed : Brushes.DarkGreen;
+            Value_Grid.Visibility = Order.IsBuy ? Visibility.Visible : Visibility.Collapsed;
+            Benefit_Grid.Visibility = Order.IsBuy ? Visibility.Collapsed : Visibility.Visible;
+            Tax_Grid.Visibility = Order.IsBuy ? Visibility.Collapsed : Visibility.Visible;
             Calculation();
         }
 
@@ -168,17 +185,27 @@ namespace Stock_Accounting.Pages.Alert
         {
             ComboBox cmb = (ComboBox)sender;
             string item = (string)cmb.SelectedItem;
-            if (item.Contains(" "))
+
+            Price_TextBox.Text = "";
+            Count_TextBox.Text = "";
+            Order.Count = 0;
+            Order.Price = 0;
+
+            if (item != null && item.Contains(" ") && item.Split(' ').Length > 1)
             {
                 string[] itemArr = item.Split(' ');
                 CompanyInfo company = CompanyInfos.Find(x => x.ID == itemArr[0]);
                 Order.StockID = company.ID;
                 Order.StockName = company.Nickname;
 
-                Price_TextBox.Text = "";
-                Count_TextBox.Text = "";
-                Calculation();
+                var nowValue = WebAPIManager.GetStockClosingInfo(company.ID);
+                if (nowValue.Result.data.Length > 0 &&
+                    double.TryParse(nowValue.Result.data.Last()[6], out double price))
+                {
+                    StockClosingPrice = price;
+                }
             }
+            Calculation();
         }
 
         private void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
@@ -220,6 +247,28 @@ namespace Stock_Accounting.Pages.Alert
         {
             TextBox box = (TextBox)sender;
             Order.Mark = box.Text;
+        }
+
+        private void Clear_Button_Click(object sender, RoutedEventArgs e)
+        {
+            Stock_Info.SelectedIndex = -1;
+            Price_TextBox.Text = "";
+            Count_TextBox.Text = "";
+            Mark_TextBox.Text = "";
+            Order.StockID = "";
+            Order.StockName = "";
+            Order.Count = 0;
+            Order.Price = 0;
+            Order.Mark = "";
+            Calculation();
+        }
+
+        private void OK_Button_Click(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine(Order.AccountName + (Order.IsBuy ? "買進" : "賣出") + "(" + Order.StockID + ")" + Order.StockName + " " + Order.Price + "元 " + Order.Count +"股");
+
+            DialogResult = true;
+            Close();
         }
     }
 }

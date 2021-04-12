@@ -117,13 +117,39 @@
                         <Label Content="手續費:" Grid.Row="4" Grid.Column="0" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
                         <Label x:Name="Order_Fee_Label" Grid.Row="4" Grid.Column="1" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
 
-                        <Label Content="交易稅:" Grid.Row="4" Grid.Column="2" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
-                        <Label x:Name="Order_Tax_Label" Grid.Row="4" Grid.Column="3" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <Grid x:Name="Tax_Grid" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2" Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Content="交易稅:" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                            <Label x:Name="Order_Tax_Label" Grid.Column="1" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        </Grid>
 
+                        <Label Content="收支:" Grid.Row="5" Grid.Column="2" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <Label x:Name="Total_Cost_Label" Grid.Row="5" Grid.Column="3" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+
+                        <Grid x:Name="Value_Grid" Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Content="市值:" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                            <Label x:Name="Total_Value_Label" Grid.Column="1" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        </Grid>
+
+                        <Grid x:Name="Benefit_Grid" Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="2" Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Content="損益:" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                            <Label x:Name="Total_Benefit_Label" Grid.Column="1" FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        </Grid>
                     </Grid>
                 </Border>
-                <Button Grid.Row="1" Grid.Column="0" Content="清空" FontSize="20"/>
-                <Button x:Name="OK_Btn" Grid.Row="1" Grid.Column="2" Content="確定" FontSize="20"/>
+                <Button Grid.Row="1" Grid.Column="0" Content="清空" FontSize="20" Click="Clear_Button_Click"/>
+                <Button x:Name="OK_Btn" Grid.Row="1" Grid.Column="2" Content="確定" FontSize="20" Click="OK_Button_Click"/>
             </Grid>
         </Grid>
 
