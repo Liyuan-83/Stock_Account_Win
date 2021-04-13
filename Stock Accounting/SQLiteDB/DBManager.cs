@@ -45,7 +45,7 @@ namespace MySQLiteDB
             sqlite_cmd.ExecuteNonQuery();
 
             sqlite_cmd.CommandText = data.InsertOrUpdateValue();
-            
+
             sqlite_cmd.ExecuteNonQuery();
 
             sqlite_connect.Close();
@@ -98,25 +98,56 @@ namespace MySQLiteDB
             }
         }
 
+        public _DefaultModel GetNewestData(String tableName, Type type)
+        {
+            ConnectDB();
+            //try
+            //{   
+                sqlite_cmd.CommandText = "select* from '" + tableName + "' order by id desc limit 0,1"; //select table
+                SQLiteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+                _DefaultModel temp = (_DefaultModel)Activator.CreateInstance(type);
+                while (sqlite_datareader.Read())
+                {
+                    temp = (_DefaultModel)Activator.CreateInstance(type, sqlite_datareader);
+                }
+                sqlite_connect.Close();
+                return temp;
+            //}
+            //catch
+            //{
+            //    sqlite_connect.Close();
+            //    return null;
+            //}
+
+        }
+
         public bool ShouldUpdateCompanyData()
         {
             ConnectDB();
-            sqlite_cmd.CommandText = "SELECT * FROM " + CompanyInfo.TABLE_NAME + " LIMIT 1";
-            SQLiteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
-            CompanyInfo temp = new CompanyInfo();
-            while (sqlite_datareader.Read())
+            try
             {
-                temp = (CompanyInfo)Activator.CreateInstance(typeof(CompanyInfo), sqlite_datareader);
+                sqlite_cmd.CommandText = "SELECT * FROM " + CompanyInfo.TABLE_NAME + " LIMIT 1";
+                SQLiteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
+                CompanyInfo temp = new CompanyInfo();
+                while (sqlite_datareader.Read())
+                {
+                    temp = (CompanyInfo)Activator.CreateInstance(typeof(CompanyInfo), sqlite_datareader);
+                }
+                sqlite_connect.Close();
+                var twCulture = new CultureInfo("zh-TW", true);
+                twCulture.DateTimeFormat.Calendar = new TaiwanCalendar();
+                string str = temp.UpdateDate;
+                str = str.PadLeft(8, '0');
+                DateTime today = DateTime.Now;
+                DateTime updateTime = DateTime.ParseExact(str, "yMMdd", twCulture);
+                TimeSpan sp = today.Subtract(updateTime);
+                return sp.TotalDays > 10;
             }
-            sqlite_connect.Close();
-            var twCulture = new CultureInfo("zh-TW", true);
-            twCulture.DateTimeFormat.Calendar = new TaiwanCalendar();
-            string str = temp.UpdateDate;
-            str = str.PadLeft(8, '0');
-            DateTime today = DateTime.Now;
-            DateTime updateTime = DateTime.ParseExact(str, "yMMdd", twCulture);
-            TimeSpan sp = today.Subtract(updateTime);
-            return sp.TotalDays > 10;
+            catch
+            {
+                sqlite_connect.Close();
+                return true;
+            }
         }
     }
 }

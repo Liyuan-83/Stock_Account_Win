@@ -25,6 +25,7 @@ namespace Stock_Accounting.Pages.Alert
         private List<Account> Accounts = (List<Account>)DBManager.share.GetAllListFromTable(Account.TABLE_NAME, typeof(Account));
         private List<CompanyInfo> CompanyInfos = (List<CompanyInfo>)DBManager.share.GetAllListFromTable(CompanyInfo.TABLE_NAME, typeof(CompanyInfo));
         private Order Order = new Order();
+        private CompanyInfo selectedCompany;
         private double StockClosingPrice = 0;
 
         public NewOrderAlert(int selectIndex = 0)
@@ -33,6 +34,15 @@ namespace Stock_Accounting.Pages.Alert
             SetupDataSource();
             SetupDataBinding();
             Account_Selection.SelectedIndex = selectIndex;
+        }
+
+        public NewOrderAlert(Order order, int selectIndex = 0)
+        {
+            InitializeComponent();
+            SetupDataSource();
+            SetupDataBinding();
+            Account_Selection.SelectedIndex = selectIndex;
+            Order = order;
         }
 
         private void SetupDataSource()
@@ -116,6 +126,12 @@ namespace Stock_Accounting.Pages.Alert
                 Source = Order
             };
             Order_Tax_Label.SetBinding(Label.ContentProperty, TaxBinding);
+
+            var CostBinding = new Binding("Cost")
+            {
+                Source = Order
+            };
+            Total_Cost_Label.SetBinding(Label.ContentProperty, CostBinding);
         }
 
         private void Calculation()
@@ -135,18 +151,71 @@ namespace Stock_Accounting.Pages.Alert
             int tax = (int)Math.Ceiling(Order.Count * Order.Price * 0.003);
             tax = (Order.IsBuy) ? 0 : tax;
             Order.Tax = tax;
-            int cost = (int)(Order.Price * Order.Count) * (Order.IsBuy ? -1 : 1) - Order.Fee - Order.Tax;
-            Total_Cost_Label.Content = cost;
-            Total_Cost_Label.Foreground = (cost >= 0) ? Brushes.DarkRed : Brushes.DarkGreen;
-            Total_Cost_Label.Background = (cost >= 0) ? Brushes.LightPink : Brushes.LightGreen;
+            if (Order.Type == 1)
+            {
+                //使用融資
+                if (Order.IsBuy)
+                {
+                    Order.Cost = (int)Math.Ceiling(Order.Price * Order.Count * ((selectedCompany.Level == CompanyInfo.Company_level.listed) ? 0.4 : 0.5) / 100) * 100 - Order.Fee;
+                    Order.Borrow = (int)(Order.Price * Order.Count * ((selectedCompany.Level == CompanyInfo.Company_level.listed) ? 0.6 : 0.5) / 100) * 100;
+                }
+                else
+                {
+
+                }
+            }
+            else if (Order.Type == 2)
+            {
+                //使用融券
+                //int borrow = (int)((Order.IsBuy ? 0 : 0.08) * Order.Price * Order.Count);
+                //int guarantee = (int)Math.Ceiling((Order.IsBuy ? 0 : -0.9) * Order.Cost / 100) * 100;
+                //Order.Cost = guarantee - borrow;
+            }
+            else
+            {
+                //現股 & 零股
+                Order.Cost = (int)(Order.Price * Order.Count) * (Order.IsBuy ? -1 : 1) - Order.Fee - Order.Tax;
+            }
+            Total_Cost_Label.Foreground = (Order.Cost >= 0) ? Brushes.DarkRed : Brushes.DarkGreen;
+            Total_Cost_Label.Background = (Order.Cost >= 0) ? Brushes.LightPink : Brushes.LightGreen;
             Total_Value_Label.Content = (int)(StockClosingPrice * Order.Count);
             OK_Btn.IsEnabled = true;
+        }
+
+        private void UIUpdate()
+        {
+            Value_Grid.Visibility = Order.IsBuy ? Visibility.Visible : Visibility.Collapsed;
+            Benefit_Grid.Visibility = Order.IsBuy ? Visibility.Collapsed : Visibility.Visible;
+            Tax_Grid.Visibility = Order.IsBuy ? Visibility.Collapsed : Visibility.Visible;
+            Order.Count = 0;
+            if (Order.Type == 2)
+            {
+                //使用融券
+                Count_Button.Visibility = Order.IsBuy ? Visibility.Visible : Visibility.Collapsed;
+                Count_TextBox.Visibility = Order.IsBuy ? Visibility.Collapsed : Visibility.Visible;
+            }
+            else
+            {
+                //現股 & 零股 & 融資
+                Count_Button.Visibility = Order.IsBuy ? Visibility.Collapsed : Visibility.Visible;
+                Count_TextBox.Visibility = Order.IsBuy ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
 
         private void Account_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox cmb = (ComboBox)sender;
             Order.AccountName = Accounts[cmb.SelectedIndex].Name;
+            Calculation();
+        }
+
+        private void IsBuy_Button_Click(object sender, RoutedEventArgs e)
+        {
+            Order.IsBuy = !Order.IsBuy;
+            Button btn = (Button)sender;
+            btn.Content = Order.IsBuy ? "買進" : "賣出";
+            btn.Background = Order.IsBuy ? Brushes.DarkRed : Brushes.DarkGreen;
+            UIUpdate();
             Calculation();
         }
 
@@ -169,18 +238,6 @@ namespace Stock_Accounting.Pages.Alert
             itemsViewOriginal.Refresh();
         }
 
-        private void IsBuy_Button_Click(object sender, RoutedEventArgs e)
-        {
-            Order.IsBuy = !Order.IsBuy;
-            Button btn = (Button)sender;
-            btn.Content = Order.IsBuy ? "買進" : "賣出";
-            btn.Background = Order.IsBuy ? Brushes.DarkRed : Brushes.DarkGreen;
-            Value_Grid.Visibility = Order.IsBuy ? Visibility.Visible : Visibility.Collapsed;
-            Benefit_Grid.Visibility = Order.IsBuy ? Visibility.Collapsed : Visibility.Visible;
-            Tax_Grid.Visibility = Order.IsBuy ? Visibility.Collapsed : Visibility.Visible;
-            Calculation();
-        }
-
         private void Stock_Info_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox cmb = (ComboBox)sender;
@@ -194,11 +251,11 @@ namespace Stock_Accounting.Pages.Alert
             if (item != null && item.Contains(" ") && item.Split(' ').Length > 1)
             {
                 string[] itemArr = item.Split(' ');
-                CompanyInfo company = CompanyInfos.Find(x => x.ID == itemArr[0]);
-                Order.StockID = company.ID;
-                Order.StockName = company.Nickname;
+                selectedCompany = CompanyInfos.Find(x => x.ID == itemArr[0]);
+                Order.StockID = selectedCompany.ID;
+                Order.StockName = selectedCompany.Nickname;
 
-                var nowValue = WebAPIManager.GetStockClosingInfo(company.ID);
+                var nowValue = WebAPIManager.GetStockClosingInfo(selectedCompany.ID);
                 if (nowValue.Result.data.Length > 0 &&
                     double.TryParse(nowValue.Result.data.Last()[6], out double price))
                 {
@@ -218,6 +275,7 @@ namespace Stock_Accounting.Pages.Alert
         {
             ComboBox cmb = (ComboBox)sender;
             Order.Type = cmb.SelectedIndex;
+            UIUpdate();
             Calculation();
         }
 
@@ -230,6 +288,11 @@ namespace Stock_Accounting.Pages.Alert
                 Order.Count = count;
                 Calculation();
             }
+        }
+
+        private void Count_Button_Click(object sender, RoutedEventArgs e)
+        {
+            Calculation();
         }
 
         private void Price_TextBox_TextChangedChanged(object sender, TextChangedEventArgs e)
@@ -259,13 +322,20 @@ namespace Stock_Accounting.Pages.Alert
             Order.StockName = "";
             Order.Count = 0;
             Order.Price = 0;
+            Order.Cost = 0;
+            Order.Borrow = 0;
             Order.Mark = "";
             Calculation();
         }
 
         private void OK_Button_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine(Order.AccountName + (Order.IsBuy ? "買進" : "賣出") + "(" + Order.StockID + ")" + Order.StockName + " " + Order.Price + "元 " + Order.Count +"股");
+            Console.WriteLine(Order.AccountName + (Order.IsBuy ? "買進" : "賣出") + "(" + Order.StockID + ")" + Order.StockName + " " + Order.Price + "元 " + Order.Count + "股" + " 共" + Order.Cost + "元");
+
+            DBManager.share.InsertOrUpdateData(Order);
+            var _order = (Order)DBManager.share.GetNewestData(Order.TABLE_NAME, typeof(Order));
+            Stock stock = new Stock(_order);
+            DBManager.share.InsertOrUpdateData(stock);
 
             DialogResult = true;
             Close();

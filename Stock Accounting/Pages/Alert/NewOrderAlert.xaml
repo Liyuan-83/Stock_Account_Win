@@ -63,6 +63,7 @@
             <ComboBox x:Name="Type_Selection" Grid.Row="4" Grid.Column="1" SelectionChanged="Type_SelectionChanged" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" Margin="5" SelectedIndex="0"/>
 
             <TextBox Name="Count_TextBox" Style="{StaticResource placeHolder}" Tag="請輸入數量"  Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="2" FontSize="20" Margin="5" TextAlignment="Center" TextChanged="Count_TextBox_TextChangedChanged"/>
+            <Button Name="Count_Button" Content="庫存選擇"  Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="2" FontSize="20" Margin="5" Visibility="Collapsed" Click="Count_Button_Click"/>
 
             <TextBox Name="Price_TextBox" Style="{StaticResource placeHolder}" Tag="請輸入金額"  Grid.Column="1" Grid.Row="6" Grid.ColumnSpan="2" FontSize="20" Margin="5" TextAlignment="Center" TextChanged="Price_TextBox_TextChangedChanged"/>
 

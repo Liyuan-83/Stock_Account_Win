@@ -77,7 +77,7 @@ namespace MySQLiteDB.Model
 
         public string URL { get; set; }
 
-        public int Level { get; set; }
+        public Company_level Level { get; set; }
 
         public override String TableName() => TABLE_NAME;
 
@@ -117,7 +117,7 @@ namespace MySQLiteDB.Model
             FaxMachineNumber = reader["傳真機號碼"].ToString();
             Email = reader["電子郵件信箱"].ToString();
             URL = reader["網址"].ToString();
-            Level = Int32.Parse(reader["上市上櫃"].ToString());
+            Level = (Company_level)Int32.Parse(reader["上市上櫃"].ToString());
         }
 
         public CompanyInfo(string[] strArr, Company_level level)
@@ -154,7 +154,7 @@ namespace MySQLiteDB.Model
             FaxMachineNumber = strArr[29];
             Email = strArr[30];
             URL = strArr[31];
-            Level = (int)level;
+            Level = level;
         }
 
         public override string CreateTable()
@@ -198,7 +198,7 @@ namespace MySQLiteDB.Model
                 "'" + FaxMachineNumber + "'," +
                 "'" + Email + "'," +
                 "'" + URL + "'," +
-                "" + Level + ");" +
+                "" + (int)Level + ");" +
                 "UPDATE " + TABLE_NAME + " SET " +
                 "出表日期 = '" + UpdateDate + "'," +
                 "公司代號 = '" + ID + "'," +
@@ -232,7 +232,7 @@ namespace MySQLiteDB.Model
                 "傳真機號碼 = '" + FaxMachineNumber + "'," +
                 "電子郵件信箱 = '" + Email + "'," +
                 "網址 = '" + URL + "'," +
-                "上市上櫃 = " + Level + " WHERE 公司代號 = '" + ID + "';";
+                "上市上櫃 = " + (int)Level + " WHERE 公司代號 = '" + ID + "';";
         }
     }
 }

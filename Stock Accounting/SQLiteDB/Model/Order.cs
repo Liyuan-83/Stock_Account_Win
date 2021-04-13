@@ -21,6 +21,8 @@ namespace MySQLiteDB.Model
         private int _count;
         private int _fee;
         private int _tax;
+        private int _cost;
+        private int _borrow;
         private int _type;
         private string _mark;
 
@@ -46,6 +48,10 @@ namespace MySQLiteDB.Model
 
         public int Tax { get { return _tax; } set { _tax = value; OnPropertyChanged(); } }
 
+        public int Cost { get { return _cost; } set { _cost = value; OnPropertyChanged(); } }
+
+        public int Borrow { get { return _borrow; } set { _borrow = value; OnPropertyChanged(); } }
+
         public int Type { get { return _type; } set { _type = value; OnPropertyChanged(); } }
 
         public string Mark { get { return _mark; } set { _mark = value; OnPropertyChanged(); } }
@@ -55,6 +61,7 @@ namespace MySQLiteDB.Model
         public Order()
         {
             IsBuy = true;
+            Date = DateTime.Today.ToString("yyyy/MM/dd");
         }
 
         public Order(SQLiteDataReader reader)
@@ -64,11 +71,13 @@ namespace MySQLiteDB.Model
             StockID = reader["stock_id"].ToString();
             StockName = reader["stock_name"].ToString();
             Date = reader["date"].ToString();
-            IsBuy = Boolean.Parse(reader["is_buy"].ToString());
+            IsBuy = Int32.Parse(reader["is_buy"].ToString()) == 1;
             Price = double.Parse(reader["price"].ToString());
             Count = Int32.Parse(reader["count"].ToString());
             Fee = Int32.Parse(reader["fee"].ToString());
             Tax = Int32.Parse(reader["tax"].ToString());
+            Cost = Int32.Parse(reader["cost"].ToString());
+            Borrow = Int32.Parse(reader["borrow"].ToString());
             Type = Int32.Parse(reader["type"].ToString());
             Mark = reader["mark"].ToString();
         }
@@ -80,12 +89,14 @@ namespace MySQLiteDB.Model
 
         public override string CreateTable()
         {
-            return @"CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (id INTEGER PRIMARY KEY AUTOINCREMENT, account_name TEXT, stock_id TEXT, stock_name TEXT, date TEXT, is_buy INTERGER, price REAL, count INTEGER, fee INTEGER, tax INTEGER, type INTEGER, mark TEXT)";
+            return @"CREATE TABLE IF NOT EXISTS '" + TABLE_NAME + "' (id INTEGER PRIMARY KEY AUTOINCREMENT, account_name TEXT, stock_id TEXT, stock_name TEXT, date TEXT, is_buy TEXT, price REAL, count INTEGER, fee INTEGER, tax INTEGER, cost INTEGER, borrow INTEGER, type INTEGER, mark TEXT)";
         }
 
         public override string InsertOrUpdateValue()
         {
-            return "INSERT INTO " + TABLE_NAME + " VALUES (null, '" + AccountName + "','" + StockID + "','" + StockName + "','" + Date + "','" + IsBuy + "','" + Price + "','" + Count + "','" + Fee + "','" + Tax + "','" + Type + "','" + Mark + "');";
+            string _ID = (ID >= 0) ? ID.ToString() : "NULL";
+            return "INSERT OR IGNORE INTO '" + TABLE_NAME + "' VALUES (" + _ID + ", '" + AccountName + "','" + StockID + "','" + StockName + "','" + Date + "','" + IsBuy + "','" + Price + "','" + Count + "','" + Fee + "','" + Tax + "','" + Cost + "','" + Borrow + "','" + Type + "','" + Mark + "');" +
+                "UPDATE '" + TABLE_NAME + "' SET account_name = '" + AccountName + "', stock_id = '" + StockID + "', stock_name = '" + StockName + "', date = '" + Date + "', is_buy = " + IsBuy + ", price = " + Price + ", count = " + Count + ", fee = " + Fee + ", tax = " + Tax + ", cost = " + Cost + ", borrow = " + Borrow + ", type  = " + Type + ", mark = '" + Mark + "'" + " WHERE id = " + _ID;
         }
     }
 }
