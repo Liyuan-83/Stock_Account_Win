@@ -254,13 +254,7 @@ namespace Stock_Accounting.Pages.Alert
                 selectedCompany = CompanyInfos.Find(x => x.ID == itemArr[0]);
                 Order.StockID = selectedCompany.ID;
                 Order.StockName = selectedCompany.Nickname;
-
-                var nowValue = WebAPIManager.GetStockClosingInfo(selectedCompany.ID);
-                if (nowValue.Result.data.Length > 0 &&
-                    double.TryParse(nowValue.Result.data.Last()[6], out double price))
-                {
-                    StockClosingPrice = price;
-                }
+                StockClosingPrice = DBManager.share.GetStockClosingInfo(selectedCompany.ID).ClosingPrice;
             }
             Calculation();
         }

@@ -44,16 +44,20 @@ namespace MySQLiteDB.Model
 
         public int Type { get { return _type; } set { _type = value; OnPropertyChanged(); } }
 
+        public int Value { get { return CalculateValue();  } }
+
         public override String TableName() => TABLE_NAME;
 
         public Stock(string id, int orderID)
         {
+            ID = -1;
             StockID = id;
             OrderIDs = new List<int>();
         }
 
         public Stock(Order order)
         {
+            ID = -1;
             StockID = order.StockID;
             StockName = order.StockName;
             OrderIDs = new List<int>();
@@ -107,6 +111,11 @@ namespace MySQLiteDB.Model
 
             return "INSERT OR IGNORE INTO " + TABLE_NAME + " VALUES (" + _ID + ", '" + StockID + "','" + StockName + "','" + _OrderID + "','" + AccountName + "','" + Price + "','" + Count + "','" + Cost + "','" + Borrow + "','" + Type + "');" +
                 "UPDATE " + TABLE_NAME + " SET stock_id = '" + StockID + "', stock_name  = '" + StockName + "', orderIDs  = '" + _OrderID + "',account_name = '" + AccountName + "', price  = '" + Price + "', count  = '" + Count + "', cost  = '" + Cost + "', borrow  = '" + Borrow + "', type  = '" + Type + "' WHERE id = " + _ID;
+        }
+
+        private int CalculateValue()
+        {
+            return 0;
         }
     }
 }

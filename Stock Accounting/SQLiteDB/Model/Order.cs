@@ -60,6 +60,7 @@ namespace MySQLiteDB.Model
 
         public Order()
         {
+            ID = -1;
             IsBuy = true;
             Date = DateTime.Today.ToString("yyyy/MM/dd");
         }
@@ -71,7 +72,7 @@ namespace MySQLiteDB.Model
             StockID = reader["stock_id"].ToString();
             StockName = reader["stock_name"].ToString();
             Date = reader["date"].ToString();
-            IsBuy = Int32.Parse(reader["is_buy"].ToString()) == 1;
+            IsBuy = bool.Parse(reader["is_buy"].ToString());
             Price = double.Parse(reader["price"].ToString());
             Count = Int32.Parse(reader["count"].ToString());
             Fee = Int32.Parse(reader["fee"].ToString());
@@ -95,8 +96,8 @@ namespace MySQLiteDB.Model
         public override string InsertOrUpdateValue()
         {
             string _ID = (ID >= 0) ? ID.ToString() : "NULL";
-            return "INSERT OR IGNORE INTO '" + TABLE_NAME + "' VALUES (" + _ID + ", '" + AccountName + "','" + StockID + "','" + StockName + "','" + Date + "','" + IsBuy + "','" + Price + "','" + Count + "','" + Fee + "','" + Tax + "','" + Cost + "','" + Borrow + "','" + Type + "','" + Mark + "');" +
-                "UPDATE '" + TABLE_NAME + "' SET account_name = '" + AccountName + "', stock_id = '" + StockID + "', stock_name = '" + StockName + "', date = '" + Date + "', is_buy = " + IsBuy + ", price = " + Price + ", count = " + Count + ", fee = " + Fee + ", tax = " + Tax + ", cost = " + Cost + ", borrow = " + Borrow + ", type  = " + Type + ", mark = '" + Mark + "'" + " WHERE id = " + _ID;
+            return "INSERT OR IGNORE INTO '" + TABLE_NAME + "' VALUES (" + _ID + ", '" + AccountName + "','" + StockID + "','" + StockName + "','" + Date + "','" + IsBuy.ToString() + "','" + Price + "','" + Count + "','" + Fee + "','" + Tax + "','" + Cost + "','" + Borrow + "','" + Type + "','" + Mark + "');" +
+                "UPDATE '" + TABLE_NAME + "' SET account_name = '" + AccountName + "', stock_id = '" + StockID + "', stock_name = '" + StockName + "', date = '" + Date + "', is_buy = " + IsBuy.ToString() + ", price = " + Price + ", count = " + Count + ", fee = " + Fee + ", tax = " + Tax + ", cost = " + Cost + ", borrow = " + Borrow + ", type  = " + Type + ", mark = '" + Mark + "'" + " WHERE id = " + _ID;
         }
     }
 }

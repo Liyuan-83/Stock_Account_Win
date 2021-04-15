@@ -102,6 +102,7 @@
     <Compile Include="SQLiteDB\Model\CompanyInfo.cs" />
     <Compile Include="SQLiteDB\Model\Order.cs" />
     <Compile Include="SQLiteDB\Model\Stock.cs" />
+    <Compile Include="SQLiteDB\Model\StockClosingInfo.cs" />
     <Compile Include="SQLiteDB\Model\_DefaultModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

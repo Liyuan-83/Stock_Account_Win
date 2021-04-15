@@ -33,17 +33,15 @@ namespace Stock_Accounting.Pages.Alert
             InitializeComponent();
             account = _account;
             Account.Text = _account.Name;
-            Cash.Text = _account.Cash.ToString();
+            Cash.Text = _account.FirstCash.ToString();
             Fee.Text = (_account.Fee * 100).ToString();
         }
 
         private void OK_Btn_Click(object sender, RoutedEventArgs e)
         {
             account.Name = Account.Text;
-            account.StockValue = 0;
-            account.Cash = Int32.Parse(Cash.Text);
+            account.FirstCash = Int32.Parse(Cash.Text);
             account.Fee = Double.Parse((Fee.Text == "") ? "100" : Fee.Text) / 100;
-            account.Assets = account.StockValue + account.Cash;
 
             DialogResult = true;
             Close();

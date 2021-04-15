@@ -10,6 +10,7 @@ using System.Diagnostics;
 using MySQLiteDB.Model;
 using System.Collections;
 using System.Globalization;
+using Stock_Accounting.Manager;
 
 namespace MySQLiteDB
 {
@@ -56,14 +57,14 @@ namespace MySQLiteDB
             ConnectDB();
             try
             {
-                sqlite_cmd.CommandText = "DELETE FROM " + data.TableName() + " WHERE ID = " + data.ID;
+                sqlite_cmd.CommandText = "DELETE FROM '" + data.TableName() + "' WHERE ID = " + data.ID;
                 sqlite_cmd.ExecuteNonQuery();
 
-                sqlite_cmd.CommandText = "SELECT count(*) FROM " + data.TableName();
+                sqlite_cmd.CommandText = "SELECT count(*) FROM '" + data.TableName() + "'";
                 var count = Int32.Parse(sqlite_cmd.ExecuteScalar().ToString());
                 if (count == 0)
                 {
-                    sqlite_cmd.CommandText = "DROP TABLE " + data.TableName();
+                    sqlite_cmd.CommandText = "DROP TABLE '" + data.TableName() + "'";
                     sqlite_cmd.ExecuteNonQuery();
                 }
             }
@@ -76,7 +77,7 @@ namespace MySQLiteDB
             ConnectDB();
             try
             {
-                sqlite_cmd.CommandText = "SELECT * FROM " + tableName; //select table
+                sqlite_cmd.CommandText = "SELECT * FROM '" + tableName + "'"; //select table
 
                 SQLiteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
                 Type listType = typeof(List<>).MakeGenericType(new Type[] { type });
@@ -101,8 +102,8 @@ namespace MySQLiteDB
         public _DefaultModel GetNewestData(String tableName, Type type)
         {
             ConnectDB();
-            //try
-            //{   
+            try
+            {
                 sqlite_cmd.CommandText = "select* from '" + tableName + "' order by id desc limit 0,1"; //select table
                 SQLiteDataReader sqlite_datareader = sqlite_cmd.ExecuteReader();
                 _DefaultModel temp = (_DefaultModel)Activator.CreateInstance(type);
@@ -112,12 +113,12 @@ namespace MySQLiteDB
                 }
                 sqlite_connect.Close();
                 return temp;
-            //}
-            //catch
-            //{
-            //    sqlite_connect.Close();
-            //    return null;
-            //}
+            }
+            catch
+            {
+                sqlite_connect.Close();
+                return null;
+            }
 
         }
 
@@ -147,6 +148,24 @@ namespace MySQLiteDB
             {
                 sqlite_connect.Close();
                 return true;
+            }
+        }
+
+        public StockClosingInfo GetStockClosingInfo(string id)
+        {
+            List<StockClosingInfo> list = (List<StockClosingInfo>)GetAllListFromTable(StockClosingInfo.TABLE_NAME, typeof(StockClosingInfo));
+            if (list == null || 
+                list.Find(x => x.ID == id) == null || 
+                (list.Find(x => x.ID == id).Date.ToString("yyyyMMdd") != DateTime.Today.ToString("yyyyMMdd") && DateTime.Now.Hour > 15))
+            {
+                CompanyInfo company = ((List<CompanyInfo>)GetAllListFromTable(CompanyInfo.TABLE_NAME, typeof(CompanyInfo))).Find(x => x.ID == id);
+                StockClosingInfo info = new StockClosingInfo(id, company.Nickname, WebAPIManager.GetStockClosingInfo(id));
+                InsertOrUpdateData(info);
+                return GetStockClosingInfo(id);
+            }
+            else
+            {
+                return list.Find(x => x.ID == id);
             }
         }
     }

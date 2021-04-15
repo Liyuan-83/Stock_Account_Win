@@ -6,21 +6,32 @@ using System.Threading.Tasks;
 using System.Data.SQLite;
 using System.ComponentModel;
 using System.Collections;
+using System.Runtime.CompilerServices;
+using Stock_Accounting.Manager;
 
 namespace MySQLiteDB.Model
 {
-    public class Account : _DefaultModel
+    public class Account : _DefaultModel, INotifyPropertyChanged
     {
+        private string _name;
+        private int _firstCash;
+        private double _fee;
+
         public static new string TABLE_NAME = "account";
 
-        public string Name { get; set; }
-        public int Assets { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        public int Cash { get; set; }
-        
-        public double Fee { get; set; }
+        public string Name { get { return _name; } set { _name = value; OnPropertyChanged(); } }
 
-        public int StockValue { get; set; }
+        public int FirstCash { get { return _firstCash; } set { _firstCash = value; OnPropertyChanged(); } }
+
+        public double Fee { get { return _fee; } set { _fee = value; OnPropertyChanged(); } }
+
+        public int Assets { get { return CalculateAssets(); } }
+
+        public int Cash { get { return CalculateCash(); } }
+
+        public int StockValue { get { return CalculateStockValue(); } }
 
         public override String TableName() => TABLE_NAME;
 
@@ -29,22 +40,65 @@ namespace MySQLiteDB.Model
         {
             ID = Int32.Parse(reader["id"].ToString());
             Name = reader["name"].ToString();
-            Assets = Int32.Parse(reader["assets"].ToString());
-            Cash = Int32.Parse(reader["cash"].ToString());
+            FirstCash = Int32.Parse(reader["first_cash"].ToString());
             Fee = Double.Parse(reader["fee"].ToString());
-            StockValue = Int32.Parse(reader["stock_value"].ToString());
+            OnPropertyChanged("Assets");
+            OnPropertyChanged("Cash");
+            OnPropertyChanged("StockValue");
+        }
+
+        private void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         public override string CreateTable()
         {
-            return @"CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, assets INTEGER, cash INTEGER, fee REAL, stock_value INTEGER)";
+            return @"CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, first_cash INTEGER, fee REAL)";
         }
 
         public override string InsertOrUpdateValue()
         {
             string _ID = (ID >= 0) ? ID.ToString() : "NULL";
-            return "INSERT OR IGNORE INTO " + TABLE_NAME + " VALUES (" + _ID + ", '" + Name + "','" + Assets + "','" + Cash + "','" + Fee + "','" + StockValue + "');" +
-                "UPDATE " + TABLE_NAME + " SET name = '" + Name + "', assets = " + Assets + ",cash = " + Cash + ",fee = " + Fee + ",stock_value = " + StockValue + " WHERE id = " + _ID;
+            return "INSERT OR IGNORE INTO " + TABLE_NAME + " VALUES (" + _ID + ", '" + Name + "','" + FirstCash + "','" + Fee + "');" +
+                "UPDATE " + TABLE_NAME + " SET name = '" + Name + "',first_cash = " + FirstCash + ",fee = " + Fee + " WHERE id = " + _ID;
+        }
+
+        private int CalculateAssets()
+        {
+            return CalculateCash() + CalculateStockValue();
+        }
+
+        private int CalculateCash()
+        {
+            List<Order> orderList = (List<Order>)DBManager.share.GetAllListFromTable(Order.TABLE_NAME, typeof(Order));
+            int totalCost = 0;
+            if (orderList != null && orderList.Count > 0)
+            {
+                var myOrders = orderList.FindAll(x => x.AccountName == Name);
+                totalCost = myOrders.Sum(x => x.Cost);
+            }
+            return FirstCash + totalCost;
+        }
+
+        private int CalculateStockValue()
+        {
+            List<Stock> stockList = (List<Stock>)DBManager.share.GetAllListFromTable(Stock.TABLE_NAME, typeof(Stock));
+            int totalValue = 0;
+            if (stockList != null && stockList.Count > 0)
+            {
+                var myStocks = stockList.FindAll(x => x.AccountName == Name);
+                foreach (Stock stock in myStocks)
+                {
+                    var nowValue = WebAPIManager.GetStockClosingInfo(stock.StockID);
+                    if (nowValue.data.Length > 0 &&
+                        double.TryParse(nowValue.data.Last()[6], out double price))
+                    {
+                        totalValue += (int)(price * stock.Count * (1 - 0.001425 * Fee - 0.003));
+                    }
+                }
+            }
+            return totalValue;
         }
     }
 }

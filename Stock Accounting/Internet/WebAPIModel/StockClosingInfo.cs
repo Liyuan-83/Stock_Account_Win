@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Stock_Accounting.APIModel
 {
-    class StockClosingInfo
+    class APIModel_StockClosingInfo
     {
         public string stat { get; set; }
         public string date { get; set; }
