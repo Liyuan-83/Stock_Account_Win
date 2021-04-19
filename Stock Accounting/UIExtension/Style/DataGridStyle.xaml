@@ -24,8 +24,6 @@
                 </Style>
             </Setter.Value>
         </Setter>
-
-        <Setter Property="CellStyle" Value="{StaticResource SelectionCell}"/>
     </Style>
 
 

@@ -97,6 +97,9 @@
     <Compile Include="Pages\Alert\NewOrderAlert.xaml.cs">
       <DependentUpon>NewOrderAlert.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\Alert\SelectStockAlert.xaml.cs">
+      <DependentUpon>SelectStockAlert.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SQLiteDB\DBManager.cs" />
     <Compile Include="SQLiteDB\Model\Account.cs" />
     <Compile Include="SQLiteDB\Model\CompanyInfo.cs" />
@@ -122,6 +125,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\Alert\NewOrderAlert.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Alert\SelectStockAlert.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

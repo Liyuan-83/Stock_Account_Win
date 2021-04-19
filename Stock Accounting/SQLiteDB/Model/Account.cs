@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using Stock_Accounting.Manager;
+using System.Threading;
 
 namespace MySQLiteDB.Model
 {
@@ -42,9 +43,17 @@ namespace MySQLiteDB.Model
             Name = reader["name"].ToString();
             FirstCash = Int32.Parse(reader["first_cash"].ToString());
             Fee = Double.Parse(reader["fee"].ToString());
-            OnPropertyChanged("Assets");
-            OnPropertyChanged("Cash");
-            OnPropertyChanged("StockValue");
+            Reload();
+        }
+
+        public void Reload()
+        {
+            ThreadPool.QueueUserWorkItem(o =>
+            {
+                OnPropertyChanged("Assets");
+                OnPropertyChanged("Cash");
+                OnPropertyChanged("StockValue");
+            });
         }
 
         private void OnPropertyChanged([CallerMemberName] string name = null)
@@ -90,11 +99,10 @@ namespace MySQLiteDB.Model
                 var myStocks = stockList.FindAll(x => x.AccountName == Name);
                 foreach (Stock stock in myStocks)
                 {
-                    var nowValue = WebAPIManager.GetStockClosingInfo(stock.StockID);
-                    if (nowValue.data.Length > 0 &&
-                        double.TryParse(nowValue.data.Last()[6], out double price))
+                    var nowValue = DBManager.share.GetStockClosingInfo(stock.StockID);
+                    if (nowValue != null)
                     {
-                        totalValue += (int)(price * stock.Count * (1 - 0.001425 * Fee - 0.003));
+                        totalValue += (int)(nowValue.ClosingPrice * stock.Count * (1 - 0.001425 * Fee - 0.003));
                     }
                 }
             }

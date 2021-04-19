@@ -87,6 +87,7 @@
                                     <style:ListViewStyleSelector DoubleClickHandler="DataGridCell_MouceDoubleClick"/>
                                 </Setter.Value>
                             </Setter>
+                            <Setter Property="CellStyle" Value="{StaticResource SelectionCell}"/>
                         </Style>
                     </DataGrid.Resources>
 

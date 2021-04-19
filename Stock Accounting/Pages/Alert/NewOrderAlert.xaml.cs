@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using MySQLiteDB.Model;
 using MySQLiteDB;
 using Stock_Accounting.Manager;
+using System.Threading;
 
 namespace Stock_Accounting.Pages.Alert
 {
@@ -26,6 +27,7 @@ namespace Stock_Accounting.Pages.Alert
         private List<CompanyInfo> CompanyInfos = (List<CompanyInfo>)DBManager.share.GetAllListFromTable(CompanyInfo.TABLE_NAME, typeof(CompanyInfo));
         private Order Order = new Order();
         private CompanyInfo selectedCompany;
+        private List<Stock> selectStock;
         private double StockClosingPrice = 0;
 
         public NewOrderAlert(int selectIndex = 0)
@@ -137,6 +139,12 @@ namespace Stock_Accounting.Pages.Alert
         private void Calculation()
         {
             OK_Btn.IsEnabled = false;
+            if (selectStock != null && selectStock.Count > 0)
+            {
+                Order.Count = 0;
+                foreach (Stock s in selectStock) { Order.Count += s.SaleCount; }
+            }
+
             if (Account_Selection.SelectedIndex < 0 || Stock_Info.SelectedIndex < 0 || Order.Count <= 0 || Order.Price <= 0)
             {
                 Order.Fee = 0;
@@ -148,7 +156,7 @@ namespace Stock_Accounting.Pages.Alert
             fee = (Order.Type == 3 || fee >= 20) ? fee : 20;
             Order.Fee = fee;
 
-            int tax = (int)Math.Ceiling(Order.Count * Order.Price * 0.003);
+            int tax = (int)Math.Round(Order.Count * Order.Price * 0.003);
             tax = (Order.IsBuy) ? 0 : tax;
             Order.Tax = tax;
             if (Order.Type == 1)
@@ -179,7 +187,22 @@ namespace Stock_Accounting.Pages.Alert
             Total_Cost_Label.Foreground = (Order.Cost >= 0) ? Brushes.DarkRed : Brushes.DarkGreen;
             Total_Cost_Label.Background = (Order.Cost >= 0) ? Brushes.LightPink : Brushes.LightGreen;
             Total_Value_Label.Content = (int)(StockClosingPrice * Order.Count);
-            OK_Btn.IsEnabled = true;
+            if (selectStock != null && selectStock.Count > 0)
+            {
+                int mCost = 0;
+                int mBorrow = 0;
+                int mInterest = 0;
+                foreach (Stock s in selectStock)
+                {
+                    mCost += s.GetSaleCost();
+                    mBorrow += s.GetSaleBorrow();
+                    mInterest += s.GetSaleBorrowInterest(Order.Date);
+                }
+                Total_Benefit_Label.Content = Order.Cost + mCost - mBorrow - mInterest;
+            }
+            
+            //還沒做融資融券 先擋掉
+            OK_Btn.IsEnabled = (Order.Type != 1 || Order.Type != 2);
         }
 
         private void UIUpdate()
@@ -187,7 +210,7 @@ namespace Stock_Accounting.Pages.Alert
             Value_Grid.Visibility = Order.IsBuy ? Visibility.Visible : Visibility.Collapsed;
             Benefit_Grid.Visibility = Order.IsBuy ? Visibility.Collapsed : Visibility.Visible;
             Tax_Grid.Visibility = Order.IsBuy ? Visibility.Collapsed : Visibility.Visible;
-            Order.Count = 0;
+            Count_TextBox.Text = "";
             if (Order.Type == 2)
             {
                 //使用融券
@@ -254,7 +277,10 @@ namespace Stock_Accounting.Pages.Alert
                 selectedCompany = CompanyInfos.Find(x => x.ID == itemArr[0]);
                 Order.StockID = selectedCompany.ID;
                 Order.StockName = selectedCompany.Nickname;
-                StockClosingPrice = DBManager.share.GetStockClosingInfo(selectedCompany.ID).ClosingPrice;
+                ThreadPool.QueueUserWorkItem(o =>
+                {
+                    StockClosingPrice = DBManager.share.GetStockClosingInfo(selectedCompany.ID).ClosingPrice;
+                });
             }
             Calculation();
         }
@@ -262,7 +288,7 @@ namespace Stock_Accounting.Pages.Alert
         private void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
             DatePicker datePicker = (DatePicker)sender;
-            Order.Date = datePicker.SelectedDate?.ToString("yyyy/MM/dd");
+            Order.Date = (DateTime)((datePicker.SelectedDate != null) ? datePicker.SelectedDate : DateTime.Today);
         }
 
         private void Type_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -286,6 +312,14 @@ namespace Stock_Accounting.Pages.Alert
 
         private void Count_Button_Click(object sender, RoutedEventArgs e)
         {
+            selectStock = new List<Stock>();
+            SelectStockAlert alert = new SelectStockAlert((selectedCompany == null) ? "" : selectedCompany.ID);
+
+            if (alert.ShowDialog() == true)
+            {
+                selectStock = alert.SelectedStocks;
+            }
+
             Calculation();
         }
 
@@ -319,6 +353,8 @@ namespace Stock_Accounting.Pages.Alert
             Order.Cost = 0;
             Order.Borrow = 0;
             Order.Mark = "";
+            selectedCompany = null;
+            selectStock = null;
             Calculation();
         }
 
@@ -328,8 +364,22 @@ namespace Stock_Accounting.Pages.Alert
 
             DBManager.share.InsertOrUpdateData(Order);
             var _order = (Order)DBManager.share.GetNewestData(Order.TABLE_NAME, typeof(Order));
-            Stock stock = new Stock(_order);
-            DBManager.share.InsertOrUpdateData(stock);
+            if (_order.IsBuy) {
+                Stock stock = new Stock(_order);
+                DBManager.share.InsertOrUpdateData(stock);
+            }
+            else
+            {
+                foreach (Stock s in selectStock)
+                {
+                    s.Cost -= s.GetSaleCost();
+                    s.Borrow -= s.GetSaleBorrow();
+                    s.Count -= s.SaleCount;
+                    s.SaleCount = 0;
+                    s.OrderIDs.Add(_order.ID);
+                    DBManager.share.InsertOrUpdateData(s);
+                }
+            }
 
             DialogResult = true;
             Close();

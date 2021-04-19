@@ -43,13 +43,6 @@ namespace Stock_Accounting.Manager
             }
         }
 
-        public bool ShouldUpdateCompanyData()
-        {
-            
-            
-            return true;
-        }
-
         public void UpdateCompanyData(Thread main)
         {
             using (WebClient client = new WebClient())

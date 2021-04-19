@@ -154,8 +154,8 @@ namespace MySQLiteDB
         public StockClosingInfo GetStockClosingInfo(string id)
         {
             List<StockClosingInfo> list = (List<StockClosingInfo>)GetAllListFromTable(StockClosingInfo.TABLE_NAME, typeof(StockClosingInfo));
-            if (list == null || 
-                list.Find(x => x.ID == id) == null || 
+            if (list == null ||
+                list.Find(x => x.ID == id) == null ||
                 (list.Find(x => x.ID == id).Date.ToString("yyyyMMdd") != DateTime.Today.ToString("yyyyMMdd") && DateTime.Now.Hour > 15))
             {
                 CompanyInfo company = ((List<CompanyInfo>)GetAllListFromTable(CompanyInfo.TABLE_NAME, typeof(CompanyInfo))).Find(x => x.ID == id);

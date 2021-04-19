@@ -133,6 +133,11 @@ namespace Stock_Accounting
             int selected = Account_List.SelectedIndex >= 0 ? Account_List.SelectedIndex : 0;
             var alert = new NewOrderAlert(selected);
             alert.ShowDialog();
+            foreach(Account account in _accountItems)
+            {
+                account.Reload();
+            }
+            AccountItems = _accountItems;
         }
 
         private void MediaElement_MediaEnded(object sender, RoutedEventArgs e)

@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace MySQLiteDB.Model
 {
-    class Stock : _DefaultModel, INotifyPropertyChanged
+    public class Stock : _DefaultModel, INotifyPropertyChanged
     {
         public static string[] OrderType = { "現股", "融資", "融券" };
         private string _stockID;
@@ -21,6 +21,9 @@ namespace MySQLiteDB.Model
         private int _cost;
         private int _borrow;
         private int _type;
+        private bool _isSelected;
+        private bool _isCanSelect;
+        private int _saleCount;
 
         public static new string TABLE_NAME = "stock";
 
@@ -46,13 +49,22 @@ namespace MySQLiteDB.Model
 
         public int Value { get { return CalculateValue();  } }
 
+        public string Type_Value { get { return OrderType[Type]; } }
+
+        public bool IsSelected { get { return _isSelected; } set { _isSelected = value; OnPropertyChanged(); } }
+
+        public bool IsCanSelect { get { return _isCanSelect; } set { _isCanSelect = value; OnPropertyChanged(); } }
+
+        public int SaleCount { get { return _saleCount; } set { _saleCount = value; OnPropertyChanged(); } }
+
         public override String TableName() => TABLE_NAME;
 
         public Stock(string id, int orderID)
         {
             ID = -1;
             StockID = id;
-            OrderIDs = new List<int>();
+            IsCanSelect = true;
+            OrderIDs = new List<int>(orderID);
         }
 
         public Stock(Order order)
@@ -68,6 +80,7 @@ namespace MySQLiteDB.Model
             Cost = order.Cost;
             Borrow = order.Borrow;
             Type = (order.Type == 3) ? 0 : order.Type;
+            IsCanSelect = true;
         }
 
         public Stock(SQLiteDataReader reader)
@@ -88,6 +101,7 @@ namespace MySQLiteDB.Model
             Cost = Int32.Parse(reader["cost"].ToString());
             Borrow = Int32.Parse(reader["borrow"].ToString());
             Type = Int32.Parse(reader["type"].ToString());
+            IsCanSelect = true;
         }
 
         protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -117,5 +131,23 @@ namespace MySQLiteDB.Model
         {
             return 0;
         }
+
+        public int GetSaleCost()
+        {
+            return (Count != SaleCount) ? (int)Math.Ceiling(Cost / (double)(Count * SaleCount / 100)) * 100 : Cost;
+        }
+
+        public int GetSaleBorrow()
+        {
+            return (Count != SaleCount) ? (int)Math.Ceiling(Borrow / (double)(Count * SaleCount / 100)) * 100 : Borrow;
+        }
+
+        public int GetSaleBorrowInterest(DateTime date)
+        {
+            int borrow = GetSaleBorrow();
+            Order buyin = ((List<Order>)DBManager.share.GetAllListFromTable(Order.TABLE_NAME, typeof(Order))).Find(x => x.ID == OrderIDs.First());
+            return (int)(borrow * 0.05 * (new TimeSpan(date.Ticks - buyin.Date.Ticks).TotalDays + 2) / 365 );
+        }
     }
 }
+
