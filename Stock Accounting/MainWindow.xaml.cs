@@ -38,16 +38,19 @@ namespace Stock_Accounting
                 int totalAssets = 0;
                 int totalStock = 0;
                 int totalCash = 0;
+                int totalBenefit = 0;
                 foreach (Account item in _accountItems)
                 {
                     totalAssets += item.Assets;
                     totalStock += item.StockValue;
                     totalCash += item.Cash;
+                    totalBenefit += item.BenefitValue;
                     Account_List.Items.Add(item);
                 }
                 Total_Assets.Content = totalAssets;
                 Total_Cash.Content = totalCash;
                 Total_Value.Content = totalStock;
+                Total_Profit_And_Loss.Content = totalBenefit;
             }
             get
             {

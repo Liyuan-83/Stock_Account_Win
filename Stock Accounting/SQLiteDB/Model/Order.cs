@@ -23,6 +23,7 @@ namespace MySQLiteDB.Model
         private int _tax;
         private int _cost;
         private int _borrow;
+        private int _benefit;
         private int _type;
         private string _mark;
 
@@ -52,6 +53,8 @@ namespace MySQLiteDB.Model
 
         public int Borrow { get { return _borrow; } set { _borrow = value; OnPropertyChanged(); } }
 
+        public int Benefit { get { return _benefit; } set { _benefit = value; OnPropertyChanged(); } }
+
         public int Type { get { return _type; } set { _type = value; OnPropertyChanged(); } }
 
         public string Mark { get { return _mark; } set { _mark = value; OnPropertyChanged(); } }
@@ -79,6 +82,7 @@ namespace MySQLiteDB.Model
             Tax = Int32.Parse(reader["tax"].ToString());
             Cost = Int32.Parse(reader["cost"].ToString());
             Borrow = Int32.Parse(reader["borrow"].ToString());
+            Benefit = Int32.Parse(reader["benefit"].ToString());
             Type = Int32.Parse(reader["type"].ToString());
             Mark = reader["mark"].ToString();
         }
@@ -90,14 +94,14 @@ namespace MySQLiteDB.Model
 
         public override string CreateTable()
         {
-            return @"CREATE TABLE IF NOT EXISTS '" + TABLE_NAME + "' (id INTEGER PRIMARY KEY AUTOINCREMENT, account_name TEXT, stock_id TEXT, stock_name TEXT, date TEXT, is_buy TEXT, price REAL, count INTEGER, fee INTEGER, tax INTEGER, cost INTEGER, borrow INTEGER, type INTEGER, mark TEXT)";
+            return @"CREATE TABLE IF NOT EXISTS '" + TABLE_NAME + "' (id INTEGER PRIMARY KEY AUTOINCREMENT, account_name TEXT, stock_id TEXT, stock_name TEXT, date TEXT, is_buy TEXT, price REAL, count INTEGER, fee INTEGER, tax INTEGER, cost INTEGER, borrow INTEGER, benefit INTERGER, type INTEGER, mark TEXT)";
         }
 
         public override string InsertOrUpdateValue()
         {
             string _ID = (ID >= 0) ? ID.ToString() : "NULL";
-            return "INSERT OR IGNORE INTO '" + TABLE_NAME + "' VALUES (" + _ID + ", '" + AccountName + "','" + StockID + "','" + StockName + "','" + Date.ToString("yyyy/MM/dd") + "','" + IsBuy.ToString() + "','" + Price + "','" + Count + "','" + Fee + "','" + Tax + "','" + Cost + "','" + Borrow + "','" + Type + "','" + Mark + "');" +
-                "UPDATE '" + TABLE_NAME + "' SET account_name = '" + AccountName + "', stock_id = '" + StockID + "', stock_name = '" + StockName + "', date = '" + Date.ToString("yyyy/MM/dd") + "', is_buy = " + IsBuy.ToString() + ", price = " + Price + ", count = " + Count + ", fee = " + Fee + ", tax = " + Tax + ", cost = " + Cost + ", borrow = " + Borrow + ", type  = " + Type + ", mark = '" + Mark + "'" + " WHERE id = " + _ID;
+            return "INSERT OR IGNORE INTO '" + TABLE_NAME + "' VALUES (" + _ID + ", '" + AccountName + "','" + StockID + "','" + StockName + "','" + Date.ToString("yyyy/MM/dd") + "','" + IsBuy.ToString() + "','" + Price + "','" + Count + "','" + Fee + "','" + Tax + "','" + Cost + "','" + Borrow + "','" + Benefit + "','" + Type + "','" + Mark + "');" +
+                "UPDATE '" + TABLE_NAME + "' SET account_name = '" + AccountName + "', stock_id = '" + StockID + "', stock_name = '" + StockName + "', date = '" + Date.ToString("yyyy/MM/dd") + "', is_buy = " + IsBuy.ToString() + ", price = " + Price + ", count = " + Count + ", fee = " + Fee + ", tax = " + Tax + ", cost = " + Cost + ", borrow = " + Borrow + ", benefit = " + Benefit + ", type  = " + Type + ", mark = '" + Mark + "'" + " WHERE id = " + _ID;
         }
     }
 }

@@ -89,7 +89,7 @@ namespace MySQLiteDB.Model
             StockID = reader["stock_id"].ToString();
             StockName = reader["stock_name"].ToString();
             var list = new List<int>();
-            foreach (string str in reader["orderIDs"].ToString().Split(','))
+            foreach (string str in reader["orderIDs"].ToString().Replace("*","").Split(','))
             {
                 list.Add(Int32.Parse(str));
             }
@@ -120,11 +120,25 @@ namespace MySQLiteDB.Model
             string _OrderID = "";
             foreach(int i in OrderIDs)
             {
-                _OrderID = _OrderID + ((_OrderID == "") ? "" : ",") + i;
+                _OrderID = _OrderID + ((_OrderID == "") ? "*" : ",*") + i + "*";
             }
 
             return "INSERT OR IGNORE INTO " + TABLE_NAME + " VALUES (" + _ID + ", '" + StockID + "','" + StockName + "','" + _OrderID + "','" + AccountName + "','" + Price + "','" + Count + "','" + Cost + "','" + Borrow + "','" + Type + "');" +
                 "UPDATE " + TABLE_NAME + " SET stock_id = '" + StockID + "', stock_name  = '" + StockName + "', orderIDs  = '" + _OrderID + "',account_name = '" + AccountName + "', price  = '" + Price + "', count  = '" + Count + "', cost  = '" + Cost + "', borrow  = '" + Borrow + "', type  = '" + Type + "' WHERE id = " + _ID;
+        }
+
+        public int GetSaleCost(DateTime date)
+        {
+            return GetCost() - GetBorrow() - GetBorrowInterest(date);
+        }
+
+        public void SaleByOrder(Order order)
+        {
+            Cost -= GetCost();
+            Borrow -= GetBorrow();
+            Count -= SaleCount;
+            SaleCount = 0;
+            OrderIDs.Add(order.ID);
         }
 
         private int CalculateValue()
@@ -132,19 +146,19 @@ namespace MySQLiteDB.Model
             return 0;
         }
 
-        public int GetSaleCost()
+        private int GetCost()
         {
             return (Count != SaleCount) ? (int)Math.Ceiling(Cost / (double)(Count * SaleCount / 100)) * 100 : Cost;
         }
 
-        public int GetSaleBorrow()
+        private int GetBorrow()
         {
             return (Count != SaleCount) ? (int)Math.Ceiling(Borrow / (double)(Count * SaleCount / 100)) * 100 : Borrow;
         }
 
-        public int GetSaleBorrowInterest(DateTime date)
+        private int GetBorrowInterest(DateTime date)
         {
-            int borrow = GetSaleBorrow();
+            int borrow = GetBorrow();
             Order buyin = ((List<Order>)DBManager.share.GetAllListFromTable(Order.TABLE_NAME, typeof(Order))).Find(x => x.ID == OrderIDs.First());
             return (int)(borrow * 0.05 * (new TimeSpan(date.Ticks - buyin.Date.Ticks).TotalDays + 2) / 365 );
         }

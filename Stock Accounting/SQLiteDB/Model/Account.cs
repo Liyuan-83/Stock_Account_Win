@@ -34,6 +34,8 @@ namespace MySQLiteDB.Model
 
         public int StockValue { get { return CalculateStockValue(); } }
 
+        public int BenefitValue { get { return CalculateRealBenefit(); } }
+
         public override String TableName() => TABLE_NAME;
 
         public Account() { }
@@ -53,6 +55,7 @@ namespace MySQLiteDB.Model
                 OnPropertyChanged("Assets");
                 OnPropertyChanged("Cash");
                 OnPropertyChanged("StockValue");
+                OnPropertyChanged("BenefitValue");
             });
         }
 
@@ -107,6 +110,21 @@ namespace MySQLiteDB.Model
                 }
             }
             return totalValue;
+        }
+
+        private int CalculateRealBenefit()
+        {
+            List<Order> orderList = (List<Order>)DBManager.share.GetAllListFromTable(Order.TABLE_NAME, typeof(Order));
+            int totalBenefit = 0;
+            if (orderList != null && orderList.Count > 0)
+            {
+                var myOrders = orderList.FindAll(x => x.AccountName == Name);
+                foreach (Order o in myOrders)
+                {
+                    totalBenefit += o.Benefit;
+                }
+            }
+            return totalBenefit;
         }
     }
 }

@@ -134,6 +134,12 @@ namespace Stock_Accounting.Pages.Alert
                 Source = Order
             };
             Total_Cost_Label.SetBinding(Label.ContentProperty, CostBinding);
+
+            var BenefitBinding = new Binding("Benefit")
+            {
+                Source = Order
+            };
+            Total_Benefit_Label.SetBinding(Label.ContentProperty, BenefitBinding);
         }
 
         private void Calculation()
@@ -156,7 +162,7 @@ namespace Stock_Accounting.Pages.Alert
             fee = (Order.Type == 3 || fee >= 20) ? fee : 20;
             Order.Fee = fee;
 
-            int tax = (int)Math.Round(Order.Count * Order.Price * 0.003);
+            int tax = (int)Math.Floor(Order.Count * Order.Price * 0.003);
             tax = (Order.IsBuy) ? 0 : tax;
             Order.Tax = tax;
             if (Order.Type == 1)
@@ -164,12 +170,12 @@ namespace Stock_Accounting.Pages.Alert
                 //使用融資
                 if (Order.IsBuy)
                 {
-                    Order.Cost = (int)Math.Ceiling(Order.Price * Order.Count * ((selectedCompany.Level == CompanyInfo.Company_level.listed) ? 0.4 : 0.5) / 100) * 100 - Order.Fee;
+                    Order.Cost = (int)Math.Ceiling(Order.Price * Order.Count * ((selectedCompany.Level == CompanyInfo.Company_level.listed) ? 0.4 : 0.5) / 100) * -100 - Order.Fee;
                     Order.Borrow = (int)(Order.Price * Order.Count * ((selectedCompany.Level == CompanyInfo.Company_level.listed) ? 0.6 : 0.5) / 100) * 100;
                 }
                 else
                 {
-
+                    Order.Cost = (int)(Order.Price * Order.Count) * (Order.IsBuy ? -1 : 1) - Order.Fee - Order.Tax;
                 }
             }
             else if (Order.Type == 2)
@@ -184,22 +190,20 @@ namespace Stock_Accounting.Pages.Alert
                 //現股 & 零股
                 Order.Cost = (int)(Order.Price * Order.Count) * (Order.IsBuy ? -1 : 1) - Order.Fee - Order.Tax;
             }
+
+            if (selectStock != null && selectStock.Count > 0)
+            {
+                int totalCost = 0;
+                foreach (Stock s in selectStock)
+                {
+                    totalCost += s.GetSaleCost(Order.Date);
+                }
+                Order.Benefit = Order.Cost + totalCost;
+            }
+
             Total_Cost_Label.Foreground = (Order.Cost >= 0) ? Brushes.DarkRed : Brushes.DarkGreen;
             Total_Cost_Label.Background = (Order.Cost >= 0) ? Brushes.LightPink : Brushes.LightGreen;
             Total_Value_Label.Content = (int)(StockClosingPrice * Order.Count);
-            if (selectStock != null && selectStock.Count > 0)
-            {
-                int mCost = 0;
-                int mBorrow = 0;
-                int mInterest = 0;
-                foreach (Stock s in selectStock)
-                {
-                    mCost += s.GetSaleCost();
-                    mBorrow += s.GetSaleBorrow();
-                    mInterest += s.GetSaleBorrowInterest(Order.Date);
-                }
-                Total_Benefit_Label.Content = Order.Cost + mCost - mBorrow - mInterest;
-            }
             
             //還沒做融資融券 先擋掉
             OK_Btn.IsEnabled = (Order.Type != 1 || Order.Type != 2);
@@ -211,6 +215,7 @@ namespace Stock_Accounting.Pages.Alert
             Benefit_Grid.Visibility = Order.IsBuy ? Visibility.Collapsed : Visibility.Visible;
             Tax_Grid.Visibility = Order.IsBuy ? Visibility.Collapsed : Visibility.Visible;
             Count_TextBox.Text = "";
+            Order.Count = 0;
             if (Order.Type == 2)
             {
                 //使用融券
@@ -360,7 +365,7 @@ namespace Stock_Accounting.Pages.Alert
 
         private void OK_Button_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine(Order.AccountName + (Order.IsBuy ? "買進" : "賣出") + "(" + Order.StockID + ")" + Order.StockName + " " + Order.Price + "元 " + Order.Count + "股" + " 共" + Order.Cost + "元");
+            Console.WriteLine(Order.AccountName + (Order.IsBuy ? "買進" : "賣出") + "(" + Order.StockID + ")" + Order.StockName + " " + Order.Price + "元 " + Order.Count + "股 共" + Order.Cost + "元");
 
             DBManager.share.InsertOrUpdateData(Order);
             var _order = (Order)DBManager.share.GetNewestData(Order.TABLE_NAME, typeof(Order));
@@ -372,11 +377,7 @@ namespace Stock_Accounting.Pages.Alert
             {
                 foreach (Stock s in selectStock)
                 {
-                    s.Cost -= s.GetSaleCost();
-                    s.Borrow -= s.GetSaleBorrow();
-                    s.Count -= s.SaleCount;
-                    s.SaleCount = 0;
-                    s.OrderIDs.Add(_order.ID);
+                    s.SaleByOrder(Order);
                     DBManager.share.InsertOrUpdateData(s);
                 }
             }
